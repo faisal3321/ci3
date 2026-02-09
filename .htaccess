@@ -1,0 +1,9 @@
+RewriteEngine On
+RewriteBase /broomees/
+
+# If the file or directory exists in the root, serve it directly
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Send all other requests to index.php with a question mark
+RewriteRule ^(.*)$ index.php?/$1 [L]
