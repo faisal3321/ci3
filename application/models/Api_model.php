@@ -76,6 +76,33 @@ class Api_model extends CI_Model {
 		$this->db->where('id', $id);
 		return $this->db->update('workers', $data);
 	}
+
+
+	// generate calendar
+	public function generateCalendar()
+	{
+		$now = date('Y-m-d H:i:s');
+		$today = date('Y-m-d');
+		$dayOfWeek = date('w', strtotime($today));
+
+		$insertDate = [
+			'calendar_date'		=> $today,
+			'day'				=> date('l'),
+			'month'				=> date('F'),
+			'year'				=> date('Y'),
+			'is_weekend'		=> ($dayOfWeek == 0) ? 1 : 0,
+			'created_at'		=> $now,
+			'updated_at'		=> $now
+		];
+
+		// check if date already exist to prevent duplication
+		$exist = $this->db->get_where('calendar', ['calendar_date' => $today])->num_rows();
+
+		if(!$exist) {
+			return $this->db->insert('calendar', $insertDate);
+		}
+		return false;
+	}
     
 
     

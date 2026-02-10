@@ -209,5 +209,23 @@ class Api extends RestController {
         $this->set_response($data, 200);
 	}
 
+	// Generate Calendar date
+	public function runDailyCalendar_get() 
+	{
+		$date = $this->api->generateCalendar();
+
+		if ($date) {
+			$this->set_response([
+				'status'		=> TRUE,
+				'message'		=> 'Date generated in calendar'
+			], 200);
+		} else {
+			$this->set_response([
+				'status'		=> FALSE,
+				'message'		=> 'Date already exists or failed'
+			], 409);
+		}
+	}
+
     
 }
