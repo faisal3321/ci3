@@ -49,6 +49,13 @@ class Api_model extends CI_Model {
 		return $this->db->get_where('workers', array('id' => $wrkId))
         	->result_array();
     }
+
+	public function manageWorkerAttendance($workerId)
+    {
+		$this->db->where('worker_id', $workerId);
+		$query = $this->db->get('attendance');
+        return $query->result_array();
+    }
     
 
     

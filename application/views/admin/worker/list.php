@@ -35,13 +35,11 @@
 
                 const result = await response.json();
                 
-                
-
 
                 data = result.data;
 
                 
-                // Create Table Header with your 6 fields
+                // Create Table Header with our 6 fields
                 let tableHTML = `
                     <table>
                         <thead>

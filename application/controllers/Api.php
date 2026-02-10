@@ -27,7 +27,6 @@ class Api extends RestController {
 	 */
 	public function workerlist_get()
 	{
-
         $res = $this->api->allWorkerData();
         $data = [
             'message' => 'OK',
@@ -41,6 +40,21 @@ class Api extends RestController {
 	{       
 
         $res = $this->api->singleWorkerData($_GET['workerId']);
+		
+        $data = [
+            'message' => 'OK',
+            'status'    => TRUE,
+            'data' => $res
+        ];
+        $this->set_response($data, 200);
+	}
+
+	public function manageattendance_get()
+	{       
+
+		$wId = $this->get('workerId'); 
+    	$res = $this->api->manageWorkerAttendance($wId);
+
         $data = [
             'message' => 'OK',
             'status'    => TRUE,
