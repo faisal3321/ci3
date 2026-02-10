@@ -39,13 +39,15 @@ class Api_model extends CI_Model {
 
     public function singleWorkerData($wrkId)
     {
-        $sql = "SELECT * FROM workers where id = '$wrkId'";
-        
-        // Execute the query
-        $query = $this->db->query($sql);
-        
-        // Return the results as an associative array
-        return $query->result_array();
+        // $sql = "SELECT * FROM workers where id = '$wrkId'";
+        // // Execute the query
+        // $query = $this->db->query($sql);
+        // // Return the results as an associative array
+        // return $query->result_array();
+
+		// This replaces the entire block of raw SQL
+		return $this->db->get_where('workers', array('id' => $wrkId))
+        	->result_array();
     }
     
 

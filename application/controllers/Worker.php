@@ -30,13 +30,11 @@ class Worker extends CI_Controller {
 
     public function manage()
 	{
-
         $wId = $this->uri->segment(3);
         
         $data = [
             'workerId' => $wId            
         ];
-
 		$this->load->view('admin/attendance/manage',$data);
 	}
 
