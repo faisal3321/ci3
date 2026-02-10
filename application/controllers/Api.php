@@ -26,6 +26,8 @@ class Api extends RestController {
 	 * @see https://codeigniter.com/userguide3/general/urls.html
 	 */
 
+
+	 // Adding worker
 	public function createWorker_post()
 	{
 		// using the current date and time in Y-m-d H:i:s format
@@ -43,7 +45,7 @@ class Api extends RestController {
 		];
 
 		// basic validation 
-		if (empty($insertData['name']) || empty($insertData['age']) || empty($insertData['gender']) || empty($insertData['address'])) {
+		if (empty($insertData['name']) || empty($insertData['age']) || empty($insertData['gender']) || empty($insertData['phone'])) {
 			$this->set_response([
 				'status' => FALSE,
 				'message'=> "Please enter the required fields",
@@ -69,6 +71,37 @@ class Api extends RestController {
 	}
 
 
+
+	// Delete worker
+	public function deleteWorker_get()
+	{
+		$id = $this->get('id');
+
+		if (!$id) {
+			$this->set_response([
+				'status'		=> FALSE,
+				'message'		=> 'Invalid id'
+			], 400);
+		}
+
+		// calling db model 
+		$result = $this->api->deleteWorker($id);
+
+		if($result) {
+			$this->set_response([
+				'status'		=> TRUE,
+				'message'		=> 'Worker Deleted Successful!'
+			], 200);
+		} else {
+			$this->set_response([
+				'status'		=> FALSE,
+				'message'		=> 'Cannot Delete Worker, Something Went Wrong!'
+			], 500);
+		}
+	}
+
+
+	// Worker List
 	public function workerlist_get()
 	{
         $res = $this->api->allWorkerData();
@@ -80,6 +113,8 @@ class Api extends RestController {
         $this->set_response($data, 200);
 	}
 
+
+	// Single Worker
     public function singleWorkerInfo_get()
 	{       
 
@@ -93,10 +128,12 @@ class Api extends RestController {
         $this->set_response($data, 200);
 	}
 
+
+	// Attendance of Worker
 	public function manageattendance_get()
 	{       
-
 		$wId = $this->get('workerId'); 
+
     	$res = $this->api->manageWorkerAttendance($wId);
 
         $data = [
@@ -104,6 +141,7 @@ class Api extends RestController {
             'status'    => TRUE,
             'data' => $res
         ];
+
         $this->set_response($data, 200);
 	}
 

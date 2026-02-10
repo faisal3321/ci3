@@ -57,9 +57,17 @@ class Api_model extends CI_Model {
         return $query->result_array();
     }
 
+	// create worker or add worker
 	public function insertWorker($data)
 	{
 		return $this->db->insert('workers', $data);
+	}
+
+	// delete worker
+	public function deleteWorker($id)
+	{
+		$this->db->where('id', $id);
+		return $this->db->delete('workers');
 	}
     
 

@@ -66,8 +66,8 @@
                                     <td>${obj.address}</td>
                                     <td>
                                         <a href='<?php echo base_url("worker/manage/"); ?>${obj.id}' target="_blank">Manage</a>
-                                        <a href="" target="_blank">Edit</a>
-                                        <a href="" target="_blank">Delete</a>
+                                        <a href='<?php echo base_url("worker/edit/"); ?>${obj.id}'>Edit</a>
+                                        <a href="javascript:void(0);" onclick="deleteWorker(${obj.id})" style="color:red;">Delete</a>
                                     </td>
                                 </tr>`;  
                 })
@@ -84,7 +84,34 @@
             }
         }
 
-        fetchData();
+        async function deleteWorker(id) {
+
+            if (!confirm(`Are you sure, You want to delete this worker?`)) return;
+
+            const deleteUrl = `<?php echo base_url('api/deleteWorker'); ?>?id=${id}`;
+                              
+            try {
+
+                const response = await fetch(deleteUrl, {
+                    method: 'GET'
+                })
+
+                const result = await response.json();
+
+                if (result.status) {
+                    alert(result.message);
+                    fetchData();
+                } else {
+                    alert('Error: ', result.message);
+                }
+                
+            } catch (error) {
+                console.error('Error: ', error);
+                alert('Something went wrong, could not delete worker' )
+            }
+        }
+
+    fetchData();
     </script>
 </body>
 </html>
