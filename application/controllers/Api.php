@@ -70,6 +70,8 @@ class Api extends RestController {
 		}
 	}
 
+
+
 	// update worker 
 	public function updateWorker_post()
 	{
@@ -112,6 +114,7 @@ class Api extends RestController {
 		}
 
 	}
+
 
 
 	// Update worker
@@ -165,6 +168,7 @@ class Api extends RestController {
 	}
 
 
+
 	// Worker List
 	public function workerlist_get()
 	{
@@ -176,6 +180,7 @@ class Api extends RestController {
         ];
         $this->set_response($data, 200);
 	}
+
 
 
 	// Single Worker
@@ -191,6 +196,7 @@ class Api extends RestController {
         ];
         $this->set_response($data, 200);
 	}
+
 
 
 	// Attendance of Worker
@@ -209,6 +215,8 @@ class Api extends RestController {
         $this->set_response($data, 200);
 	}
 
+
+	
 	// Generate Calendar date
 	public function runDailyCalendar_get() 
 	{
