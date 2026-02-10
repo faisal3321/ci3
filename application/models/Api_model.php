@@ -56,6 +56,11 @@ class Api_model extends CI_Model {
 		$query = $this->db->get('attendance');
         return $query->result_array();
     }
+
+	public function insertWorker($data)
+	{
+		return $this->db->insert('workers', $data);
+	}
     
 
     

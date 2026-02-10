@@ -25,6 +25,50 @@ class Api extends RestController {
 	 * map to /index.php/welcome/<method_name>
 	 * @see https://codeigniter.com/userguide3/general/urls.html
 	 */
+
+	public function createWorker_post()
+	{
+		// using the current date and time in Y-m-d H:i:s format
+    	$now = date('Y-m-d H:i:s');
+
+		$insertData = [
+			// collect data from form
+			'name' 			=> $this->post('name'),
+			'age' 			=> $this->post('age'),
+			'gender' 		=> $this->post('gender'),
+			'phone' 		=> $this->post('phone'),
+			'address' 		=> $this->post('address'),
+			'created_at'	=> $now,
+			'updated_at'	=> $now
+		];
+
+		// basic validation 
+		if (empty($insertData['name']) || empty($insertData['age']) || empty($insertData['gender']) || empty($insertData['address'])) {
+			$this->set_response([
+				'status' => FALSE,
+				'message'=> "Please enter the required fields",
+			], 400);
+
+			return ;
+		};
+
+		// calling model here
+    	$result = $this->api->insertWorker($insertData);
+
+		if ($result) {
+			$this->set_response([
+				'status'	=> TRUE,
+				'message'	=> 'Worker Added Successfully!'
+			], 201);
+		} else {
+			$this->set_response([
+				'status'	=> FALSE,
+				'message'	=> 'Failed to add worker'
+			], 500);
+		}
+	}
+
+
 	public function workerlist_get()
 	{
         $res = $this->api->allWorkerData();
