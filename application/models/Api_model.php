@@ -69,6 +69,13 @@ class Api_model extends CI_Model {
 		$this->db->where('id', $id);
 		return $this->db->delete('workers');
 	}
+
+	// update worker
+	public function updateWorker($id, $data)
+	{
+		$this->db->where('id', $id);
+		return $this->db->update('workers', $data);
+	}
     
 
     

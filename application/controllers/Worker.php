@@ -23,9 +23,10 @@ class Worker extends CI_Controller {
 		$this->load->view('admin/worker/list');
 	}
 
-    public function add()
-	{
-		$this->load->view('admin/worker/add');
+    public function add($id = NULL)
+	{	
+		$data['workerId'] = $id;
+		$this->load->view('admin/worker/add', $data);
 	}
 
     public function manage()

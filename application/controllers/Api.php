@@ -70,6 +70,70 @@ class Api extends RestController {
 		}
 	}
 
+	// update worker 
+	public function updateWorker_post()
+	{
+		$id = $this->post('id');
+		$now = date('Y-m-d H:i:s');
+
+		$updateData = [
+			'name'			=> $this->post('name'),
+			'age'			=> $this->post('age'),
+			'gender'		=> $this->post('gender'),
+			'phone'			=> $this->post('phone'),
+			'address'		=> $this->post('address'),
+			// 'created_at'	=> $now, // we do not need created_at when updating
+			'updated_at'	=> $now
+		];
+
+
+		// simple validation
+		if (empty($updateData['name']) || empty($updateData['age']) || empty($updateData['gender']) || empty($updateData['phone'])) {
+			$this->set_response([
+				'status'		=> FALSE,
+				'message'		=> 'Please fill the requires field'
+			], 400);
+			return;
+		}
+
+		// calling model
+		$res = $this->api->updateWorker($id, $updateData);
+
+		if ($res) {
+			$this->set_response([
+				'status'		=> TRUE,
+				'message'		=> 'Worker Updated Successfully!'
+			], 200);
+		} else {
+			$this->set_response([
+				'status'		=> FALSE,
+				'message'		=> 'Worker Updation Failed'
+			], 500);
+		}
+
+	}
+
+
+	// Update worker
+	public function updateWorker_get()
+	{
+		$id = $this->get('id');
+
+        $worker = $this->api->singleWorkerData($id);
+
+		if ($worker) {
+			$this->set_response([
+				'status'		=> TRUE,
+				'data'			=> $worker[0]
+			], 200);
+		} else {
+			$this->set_response([
+				'status'		=> FALSE,
+				'message'		=> 'Something went wrong, Id not found'
+			], 404);
+		}
+	}
+
 
 
 	// Delete worker

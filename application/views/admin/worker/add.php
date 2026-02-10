@@ -52,31 +52,66 @@
     <div class="form-container">
         <h1>Add Worker</h1>
         <form id="addWorkerForm">
-            <input type="text" name="name" placeholder="Full Name" required>
-            <input type="number" name="age" placeholder="Age" required>
-            <select name="gender">
+            <input type="text" name="name" id="name" placeholder="Full Name" required>
+            <input type="number" name="age" id="age" placeholder="Age" required>
+            <select name="gender" id="gender">
                 <option value="" disabled selected>Select Gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
                 <option value="others">Others</option>
             </select>
-            <input type="number" name="phone" placeholder="Phone Number" required>
-            <textarea name="address" placeholder="Residential Address"></textarea>
+            <input type="text" name="phone" id="phone" placeholder="Phone Number" required>
+            <textarea name="address" id="address" placeholder="Residential Address"></textarea>
 
-            <button type="submit">Save Worker</button>
+            <button type="submit" id="submitBtn">Save Worker</button>
         </form>
     </div>
 
     <script>
+
+
+        const editId = `<?php echo isset($workerId) ? $workerId : '' ; ?>` ;
+
+        // prefilled data when editing
+        if (editId) {
+            document.title = 'Edit Worker';
+            document.querySelector('h1').innerText = 'Edit Worker';
+            document.getElementById('submitBtn').innerText = 'Update Worker'
+
+            fetch(`<?php echo base_url('api/updateWorker'); ?>?id=${editId}`)
+                .then(res => res.json())
+                .then(result => {
+                    if(result.status) {
+                        const d = Array.isArray(result.data) ? result.data[0] : result.data;
+                        document.getElementById('name').value = d.name;
+                        document.getElementById('age').value = d.age;
+                        document.getElementById('gender').value = d.gender;
+                        document.getElementById('phone').value = d.phone;
+                        document.getElementById('address').value = d.address;
+                    }
+                })
+        }
+
+
         document.getElementById('addWorkerForm').onsubmit = async (e) => {
             e.preventDefault();
 
-            const url = '<?php echo base_url("api/createWorker"); ?>';
+            let targetUrl = '' ;
+
+            if (editId) {
+                targetUrl = '<?php echo base_url("api/updateWorker"); ?>';
+            } else {
+                targetUrl = '<?php echo base_url("api/createWorker"); ?>';
+            }
 
             const formData = new FormData(e.target);
+
+            if (editId) {
+                formData.append('id', editId);
+            }
             
             try {
-                const response = await fetch(url, {
+                const response = await fetch(targetUrl, {
                     method: 'POST',
                     body: formData
                 });
