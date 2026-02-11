@@ -18,6 +18,9 @@ class Api_model extends CI_Model {
 	 * map to /index.php/welcome/<method_name>
 	 * @see https://codeigniter.com/userguide3/general/urls.html
 	 */
+
+
+
 	public function allWorkerData()
 	{
         // $result = [
@@ -37,6 +40,8 @@ class Api_model extends CI_Model {
         return $query->result_array();
 	}
 
+
+
     public function singleWorkerData($wrkId)
     {
         // $sql = "SELECT * FROM workers where id = '$wrkId'";
@@ -50,12 +55,64 @@ class Api_model extends CI_Model {
         	->result_array();
     }
 
-	public function manageWorkerAttendance($workerId)
+
+
+	public function manageWorkerAttendance($workerId, $startDate = NULL, $endDate = NULL)
     {
-		$this->db->where('worker_id', $workerId);
-		$query = $this->db->get('attendance');
-        return $query->result_array();
+		// get worker joining date
+		$worker = $this->db->select('created_at')->get_where('workers', ['id' => $workerId])->row();
+		$joiningDate = date('Y-m-d 00:00:00', strtotime($worker->created_at));
+
+		$this->db->select('
+			a.id,
+			a.worker_id,
+			c.calendar_date as attendance_date,
+			c.is_weekend,
+			COALESCE(a.worker_attendance, CASE WHEN c.is_weekend = 1 THEN 4 ELSE 1 END) as worker_attendance,
+			COALESCE(a.customer_side_attendance, CASE WHEN c.is_weekend = 1 THEN 4 ELSE 0 END) as customer_side_attendance
+		', FALSE);
+
+		$this->db->from('calendar c');
+		$this->db->join('attendance a', 'a.attendance_date = c.calendar_date AND a.worker_id = ' .$this->db->escape($workerId), 'left');
+
+		// start day from joining date and end day is today
+		$this->db->where('c.calendar_date >= ', $joiningDate);
+		$this->db->where('c.calendar_date <= ', date('Y-m-d'));
+
+		if($startDate) {
+			$this->db->where('c.calendar_date >= ', $startDate);
+		}
+		if($endDate) {
+			$this->db->where('c.calendar_date <= ', $endDate);
+		}
+
+		$this->db->order_by('c.calendar_date', 'DESC');
+		$query = $this->db->get();
+		return $query->result_array();
+
     }
+
+
+
+	// Inserts the array into the 'attendance' table
+	public function saveAttendance($data)
+	{
+		// Check if record exists for this worker on this date
+		$exists = $this->db->get_where('attendance', [
+			'worker_id' => $data['worker_id'],
+			'attendance_date' => $data['attendance_date']
+		])->row();
+
+		if ($exists) {
+			$this->db->where('id', $exists->id);
+			return $this->db->update('attendance', $data);
+		} else {
+			$data['created_at'] = date('Y-m-d H:i:s');
+			return $this->db->insert('attendance', $data);
+		}
+	}
+
+
 
 	// create worker or add worker
 	public function insertWorker($data)
@@ -70,6 +127,8 @@ class Api_model extends CI_Model {
 		return $this->db->delete('workers');
 	}
 
+
+
 	// update worker
 	public function updateWorker($id, $data)
 	{
@@ -78,6 +137,7 @@ class Api_model extends CI_Model {
 	}
 
 
+	
 	// generate calendar
 	public function generateCalendar()
 	{

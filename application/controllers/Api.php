@@ -203,16 +203,48 @@ class Api extends RestController {
 	public function manageattendance_get()
 	{       
 		$wId = $this->get('workerId'); 
+		$start = $this->get('startDate');
+		$end = $this->get('endDate');
 
-    	$res = $this->api->manageWorkerAttendance($wId);
+    	$res = $this->api->manageWorkerAttendance($wId, $start, $end);
 
-        $data = [
-            'message' => 'OK',
-            'status'    => TRUE,
-            'data' => $res
-        ];
+		$this->set_response([
+			'status'		=> TRUE,
+			'data'			=> $res
+		], 200);
+        
+	}
 
-        $this->set_response($data, 200);
+
+
+	// save attendance
+	public function submitAttendance_post()
+	{
+		// Try to get data from post, if null, the frontend isn't sending it right
+		$worker_id = $this->post('worker_id');
+		$date = $this->post('attendance_date');
+
+		if (!$worker_id || !$date) {
+			return $this->set_response(['status' => FALSE, 'message' => 'Missing Data'], 400);
+		}
+
+		$data = [
+			'worker_id'                => $worker_id,
+			'attendance_date'          => $date,
+			'worker_attendance'        => $this->post('worker_attendance'),
+			'customer_side_attendance' => $this->post('customer_side_attendance'),
+			'punch_in'                 => '08:00:00',
+			'punch_out'                => '20:00:00',
+			'updated_at'               => date('Y-m-d H:i:s')
+		];
+
+		$result = $this->api->saveAttendance($data);
+
+		if ($result) {
+			$this->set_response(['status' => TRUE, 'message' => 'Attendance Saved!'], 200);
+		} else {
+			$this->set_response(['status' => FALSE, 'message' => 'Database Error'], 500);
+		}
 	}
 
 
