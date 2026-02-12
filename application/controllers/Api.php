@@ -140,15 +140,28 @@ class Api extends RestController {
 
 
 	// Delete worker
-	public function deleteWorker_get()
+	public function deleteWorker_delete($id = null)
 	{
-		$id = $this->get('id');
+		if ($id === null) {
+			$id = $this->get('id');
+		}
 
 		if (!$id) {
 			$this->set_response([
-				'status'		=> FALSE,
-				'message'		=> 'Invalid id'
+				'status' => FALSE,
+				'message' => 'Invalid id'
 			], 400);
+			return;
+		}
+
+		// Check if worker exists
+		$worker = $this->api->singleWorkerData($id);
+		if (!$worker) {
+			$this->set_response([
+				'status' => FALSE,
+				'message' => 'Worker not found'
+			], 404);
+			return;
 		}
 
 		// calling db model 
@@ -156,13 +169,13 @@ class Api extends RestController {
 
 		if($result) {
 			$this->set_response([
-				'status'		=> TRUE,
-				'message'		=> 'Worker Deleted Successful!'
+				'status' => TRUE,
+				'message' => 'Worker Deleted Successfully!'
 			], 200);
 		} else {
 			$this->set_response([
-				'status'		=> FALSE,
-				'message'		=> 'Cannot Delete Worker, Something Went Wrong!'
+				'status' => FALSE,
+				'message' => 'Cannot Delete Worker, Something Went Wrong!'
 			], 500);
 		}
 	}

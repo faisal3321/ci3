@@ -28,8 +28,7 @@ class Api_model extends CI_Model {
         // ];
 		// return $result;
 
-        $query =  $this->db->get('workers');
-		return $query->result_array();
+        return $this->db->get('workers')->result_array();
 	}
 
 

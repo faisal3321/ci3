@@ -85,29 +85,31 @@
         }
 
         async function deleteWorker(id) {
+            if (!confirm(`Are you sure you want to delete this worker?`)) return;
 
-            if (!confirm(`Are you sure, You want to delete this worker?`)) return;
-
-            const deleteUrl = `<?php echo base_url('api/deleteWorker'); ?>?id=${id}`;
-                              
+            // Use proper RESTful URL pattern
+            const deleteUrl = `<?php echo base_url('api/deleteWorker/'); ?>${id}`;
+                                    
             try {
-
                 const response = await fetch(deleteUrl, {
-                    method: 'GET'
-                })
+                    method: 'DELETE', 
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
 
                 const result = await response.json();
 
                 if (result.status) {
                     alert(result.message);
-                    fetchData();
+                    fetchData(); 
                 } else {
-                    alert('Error: ', result.message);
+                    alert('Error: ' + result.message);
                 }
                 
             } catch (error) {
                 console.error('Error: ', error);
-                alert('Something went wrong, could not delete worker' )
+                alert('Something went wrong, could not delete worker');
             }
         }
 

@@ -56,3 +56,4 @@ $route['translate_uri_dashes'] = FALSE;
 
 // // example
 // $route['worker-list'] = 'worker/index';
+
