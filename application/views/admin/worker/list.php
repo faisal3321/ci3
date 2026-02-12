@@ -39,7 +39,7 @@
                 data = result.data;
 
                 
-                // Create Table Header with our 6 fields
+                // create table header
                 let tableHTML = `
                     <table>
                         <thead>
