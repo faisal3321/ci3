@@ -133,11 +133,16 @@ class Api_model extends CI_Model {
 		$this->db->where('c.calendar_date >= ', $joiningDate);
 		$this->db->where('c.calendar_date <= ', $today);
 
-		if($startDate) $this->db->where('c.calendar_date >= ', $startDate);
-		if($endDate)   $this->db->where('c.calendar_date <= ', $endDate);
+		if($startDate) {
+			$this->db->where('c.calendar_date >= ', $startDate);
+		}
+		if($endDate) {
+			$this->db->where('c.calendar_date <= ', $endDate);
+		}   
 
 		$this->db->order_by('c.calendar_date', 'DESC');
 		return $this->db->get()->result_array();
+
 	}
 
 
@@ -159,10 +164,6 @@ class Api_model extends CI_Model {
 			return $this->db->insert('attendance', $data);
 		}
 	}
-
-
-
-	
 
 
 	
