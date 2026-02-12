@@ -65,8 +65,8 @@
                                     <td>${obj.gender}</td>
                                     <td>${obj.address}</td>
                                     <td>
-                                        <a href='<?php echo base_url("worker/manage/"); ?>${obj.id}' target="_blank">Manage</a>
-                                        <a href='<?php echo base_url("worker/add/"); ?>${obj.id}'>✏️</a>
+                                        <a href='<?php echo base_url("worker/manage/"); ?>${obj.id}' target="_blank">Manage</a> <br>
+                                        <a href='<?php echo base_url("worker/add/"); ?>${obj.id}'>✏️</a> <br>
                                         <a href="javascript:void(0);" onclick="deleteWorker(${obj.id})" style="color:red;">🗑️</a>
                                     </td>
                                 </tr>`;  

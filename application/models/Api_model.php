@@ -27,7 +27,7 @@ class Api_model extends CI_Model {
         //     'a','b'
         // ];
 		// return $result;
-
+		$this->db->order_by('id', 'DESC');
         return $this->db->get('workers')->result_array();
 	}
 

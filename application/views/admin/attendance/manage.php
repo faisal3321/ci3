@@ -127,7 +127,7 @@
                 }
 
                 const workerName = data[0].name || "Worker"; 
-                document.getElementById('displayWorkerName').innerText = `${workerName} (${wId})`;
+                document.getElementById('displayWorkerName').innerText = `${workerName} (id: ${wId})`;
 
                 let tableHTML = `
                     <table>
