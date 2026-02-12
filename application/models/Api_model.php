@@ -42,8 +42,7 @@ class Api_model extends CI_Model {
         // // Return the results as an associative array
         // return $query->result_array();
 		
-		$query = $this->db->get_where('workers', ['id' => $wrkId]);
-        return $query->result_array();
+		return $this->db->get_where('workers', ['id' => $wrkId])->result_array();
     }
 
 
