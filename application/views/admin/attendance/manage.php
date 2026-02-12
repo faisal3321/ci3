@@ -135,11 +135,11 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Ref ID</th>
+                                <th>ID</th>
                                 <th>Worker (ID)</th>
                                 <th>Date</th>
-                                <th>Admin Side</th>
-                                <th>Customer Side</th>
+                                <th>Admin Side Attendance</th>
+                                <th>Customer Side Attendance</th>
                                 <th>Sync Status</th>
                             </tr>
                         </thead>
@@ -160,7 +160,7 @@
                     tableHTML += `
                         <tr id="row-${obj.attendance_date}">
                             <td>${obj.id || '---'}</td>
-                            <td>${workerName} (${wId})</td>
+                            <td>${workerName} <br> ( id: ${wId} )</td>
                             <td><strong>${obj.attendance_date}</strong></td>
                             <td>${buildSelect(obj.worker_attendance, 'worker')}</td>
                             <td>${buildSelect(obj.customer_side_attendance, 'customer')}</td>
