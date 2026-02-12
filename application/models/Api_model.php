@@ -58,39 +58,66 @@ class Api_model extends CI_Model {
 
 
 	public function manageWorkerAttendance($workerId, $startDate = NULL, $endDate = NULL)
-    {
-		// get worker joining date
-		$worker = $this->db->select('created_at')->get_where('workers', ['id' => $workerId])->row();
-		$joiningDate = date('Y-m-d 00:00:00', strtotime($worker->created_at));
+	{
+		// Ensure today's date exists in the calendar
+		$this->generateCalendar();
 
+		// Get worker info to know when the joining date
+		$worker = $this->db->select('created_at')->get_where('workers', ['id' => $workerId])->row();
+		$joiningDate = date('Y-m-d', strtotime($worker->created_at));
+		$today = date('Y-m-d');
+
+		// auto-sync to calendar
+		$this->db->select('calendar_date, is_weekend');
+		$this->db->from('calendar');
+		$this->db->where('calendar_date >=', $joiningDate);
+		$this->db->where('calendar_date <=', $today);
+		$allDates = $this->db->get()->result();
+
+		foreach ($allDates as $date) {
+			$check = $this->db->get_where('attendance', [
+				'worker_id' => $workerId, 
+				'attendance_date' => $date->calendar_date
+			])->num_rows();
+
+			if ($check == 0) {
+				// Auto-calculate the default status you wanted
+				$defaultWorker = ($date->is_weekend == 1) ? 4 : 1; // Holiday if weekend, else Present
+				$defaultCust   = ($date->is_weekend == 1) ? 4 : 0; // Holiday if weekend, else N/A
+
+				$this->db->insert('attendance', [
+					'worker_id' => $workerId,
+					'attendance_date' => $date->calendar_date,
+					'worker_attendance' => $defaultWorker,
+					'customer_side_attendance' => $defaultCust,
+					'created_at' => date('Y-m-d H:i:s'),
+					'updated_at' => date('Y-m-d H:i:s')
+				]);
+			}
+		}
+
+		// fetch the data
 		$this->db->select('
 			a.id,
 			a.worker_id,
 			c.calendar_date as attendance_date,
 			c.is_weekend,
-			COALESCE(a.worker_attendance, CASE WHEN c.is_weekend = 1 THEN 4 ELSE 1 END) as worker_attendance,
-			COALESCE(a.customer_side_attendance, CASE WHEN c.is_weekend = 1 THEN 4 ELSE 0 END) as customer_side_attendance
+			a.worker_attendance,
+			a.customer_side_attendance
 		', FALSE);
 
 		$this->db->from('calendar c');
-		$this->db->join('attendance a', 'a.attendance_date = c.calendar_date AND a.worker_id = ' .$this->db->escape($workerId), 'left');
+		$this->db->join('attendance a', 'a.attendance_date = c.calendar_date AND a.worker_id = ' . $this->db->escape($workerId), 'inner');
 
-		// start day from joining date and end day is today
 		$this->db->where('c.calendar_date >= ', $joiningDate);
-		$this->db->where('c.calendar_date <= ', date('Y-m-d'));
+		$this->db->where('c.calendar_date <= ', $today);
 
-		if($startDate) {
-			$this->db->where('c.calendar_date >= ', $startDate);
-		}
-		if($endDate) {
-			$this->db->where('c.calendar_date <= ', $endDate);
-		}
+		if($startDate) $this->db->where('c.calendar_date >= ', $startDate);
+		if($endDate)   $this->db->where('c.calendar_date <= ', $endDate);
 
 		$this->db->order_by('c.calendar_date', 'DESC');
-		$query = $this->db->get();
-		return $query->result_array();
-
-    }
+		return $this->db->get()->result_array();
+	}
 
 
 
@@ -159,9 +186,14 @@ class Api_model extends CI_Model {
 		$exist = $this->db->get_where('calendar', ['calendar_date' => $today])->num_rows();
 
 		if(!$exist) {
-			return $this->db->insert('calendar', $insertDate);
+			$this->db->insert('calendar', $insertDate);
 		}
-		return false;
+
+		// fetch the data in descending order
+		$this->db->order_by('id', 'DESC');
+		$query = $this->db->get('calendar'); 
+		
+		return $query->result();
 	}
     
 
