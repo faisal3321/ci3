@@ -51,7 +51,7 @@ class Api_model extends CI_Model {
         // return $query->result_array();
 
 		// This replaces the entire block of raw SQL
-		return $this->db->get_where('workers', array('id' => $wrkId))
+		return $this->db->get_where('workers', ['id' => $wrkId])
         	->result_array();
     }
 
@@ -67,7 +67,7 @@ class Api_model extends CI_Model {
 		$joiningDate = date('Y-m-d', strtotime($worker->created_at));
 		$today = date('Y-m-d');
 
-		// auto-sync to calendar
+		// auto-sync
 		$this->db->select('calendar_date, is_weekend');
 		$this->db->from('calendar');
 		$this->db->where('calendar_date >=', $joiningDate);
@@ -81,7 +81,7 @@ class Api_model extends CI_Model {
 			])->num_rows();
 
 			if ($check == 0) {
-				// Auto-calculate the default status you wanted
+				
 				$defaultWorker = ($date->is_weekend == 1) ? 4 : 1; // Holiday if weekend, else Present
 				$defaultCust   = ($date->is_weekend == 1) ? 4 : 0; // Holiday if weekend, else N/A
 
