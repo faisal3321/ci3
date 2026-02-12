@@ -77,12 +77,13 @@ class Api_model extends CI_Model {
 		$this->generateCalendar();
 
 		// get worker information to know when the joining date
-		$worker = $this->db->select('created_at')->get_where('workers', ['id' => $workerId])->row();
+		$worker = $this->db->select('name, created_at')->get_where('workers', ['id' => $workerId])->row();
 
 		if (!$worker) {
 			return [];
 		}
 
+		$workerName  = $worker->name;
 		$joiningDate = date('Y-m-d', strtotime($worker->created_at));
 		$today = date('Y-m-d');
 
@@ -119,6 +120,7 @@ class Api_model extends CI_Model {
 		$this->db->select('
 			a.id,
 			a.worker_id,
+			w.name,
 			c.calendar_date as attendance_date,
 			c.is_weekend,
 			a.worker_attendance,
@@ -127,8 +129,9 @@ class Api_model extends CI_Model {
 
 		$this->db->from('calendar c');
 		$this->db->join('attendance a', 'a.attendance_date = c.calendar_date', 'inner');
-		$this->db->where('a.worker_id', $workerId);
+		$this->db->join('workers w', 'w.id = a.worker_id', 'inner');
 
+		$this->db->where('a.worker_id', $workerId);
 		$this->db->where('c.calendar_date >= ', $joiningDate);
 		$this->db->where('c.calendar_date <= ', $today);
 

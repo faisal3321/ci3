@@ -5,28 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Attendance</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f8f9fa; color: #333; }
-        tr:hover { background-color: #f1f1f1; }
-        /* Style for our new dropdowns */
-        select { padding: 5px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f8f9fa; }
+        
+        /* Header and Filter Layout */
+        .header-wrapper { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        h1 { color: #333; margin: 0; font-size: 1.5rem; }
+        .worker-title { color: #007bff; }
+        
+        /* Table Styling */
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        th, td { border: 1px solid #eee; padding: 12px; text-align: left; }
+        th { background-color: #ffffff; color: #666; font-weight: 600; text-transform: uppercase; font-size: 0.85em; }
+        tr:hover { background-color: #fcfcfc; }
+        
+        /* Form Elements */
+        select { padding: 6px; border-radius: 4px; border: 1px solid #ddd; cursor: pointer; background: #fff; width: 100%; }
         .sync-status { font-size: 0.85em; font-weight: bold; }
+
+        /* Filter Pop-up Styles (Positioned Right) */
+        .filter-container { position: relative; }
+        .filter-trigger-btn { 
+            padding: 10px 18px; cursor: pointer; display: flex; align-items: center; gap: 10px; 
+            background: #007bff; color: white; border: none; border-radius: 6px; font-weight: 500;
+        }
+        
+        #dateFilterPopup { 
+            display: none; position: absolute; top: 50px; right: 0; background: white; 
+            padding: 20px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
+            z-index: 1000; border: 1px solid #ddd; width: 280px; 
+        }
+        .filter-group { margin-bottom: 15px; }
+        .filter-group label { display: block; font-size: 12px; color: #888; margin-bottom: 5px; }
+        .filter-group input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        
+        .filter-actions { display: flex; gap: 10px; }
+        .btn-apply { flex: 2; padding: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-reset { flex: 1; padding: 10px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h1>Worker Attendance Log</h1>
 
-    <div style="margin-bottom: 20px; background: #f4f4f4; padding: 15px; border-radius: 8px;">
-        <label>Start Date:</label>
-        <input type="date" id="startDate">
-        
-        <label>End Date:</label>
-        <input type="date" id="endDate">
-        
-        <button onclick="applyFilter()" style="padding: 8px 15px; cursor: pointer;">Apply Filter</button>
-        <button onclick="fetchData(wId)" style="padding: 8px 15px;">Reset</button>
+    <div class="header-wrapper">
+        <h1 id="pageTitle">Attendance Log: <span class="worker-title" id="displayWorkerName">Loading...</span></h1>
+
+        <div class="filter-container">
+            <button class="filter-trigger-btn" onclick="toggleFilter(event)">
+                <span>📅</span> Filter by Date
+            </button>
+
+            <div id="dateFilterPopup">
+                <div class="filter-group">
+                    <label>Start Date</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="filter-group">
+                    <label>End Date</label>
+                    <input type="date" id="endDate">
+                </div>
+                <div class="filter-actions">
+                    <button class="btn-apply" onclick="applyFilter()">Apply</button>
+                    <button class="btn-reset" onclick="resetFilter()">Reset</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="result">
@@ -36,11 +84,32 @@
     <script>
         const wId = "<?php echo $workerId; ?>";
 
+        function toggleFilter(event) {
+            event.stopPropagation();
+            const popup = document.getElementById('dateFilterPopup');
+            popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
+        }
+
         function applyFilter() {
             const start = document.getElementById('startDate').value;
             const end = document.getElementById('endDate').value;
+            document.getElementById('dateFilterPopup').style.display = 'none';
             fetchData(wId, start, end);
         }
+
+        function resetFilter() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('dateFilterPopup').style.display = 'none';
+            fetchData(wId);
+        }
+
+        document.addEventListener('click', function(event) {
+            const popup = document.getElementById('dateFilterPopup');
+            if (popup && !popup.contains(event.target)) {
+                popup.style.display = 'none';
+            }
+        });
 
         async function fetchData(workerId, start = '', end = '') {
             let url = `<?php echo base_url('api/manageattendance'); ?>?workerId=${workerId}`;
@@ -48,48 +117,38 @@
             if (end) url += `&endDate=${end}`;
 
             try {
-                document.getElementById('result').innerHTML = '<p>Loading data...</p>';
-                
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {'Content-Type': 'application/json'}
-                });
-
-                if (!response.ok) throw new Error('Something went wrong');
-
+                const response = await fetch(url);
                 const result = await response.json();
                 const data = result.data;
 
                 if (!data || data.length === 0) {
-                    document.getElementById('result').innerHTML = '<p>No attendance records found for this range.</p>';
+                    document.getElementById('result').innerHTML = '<p>No records found.</p>';
                     return;
                 }
+
+                // Get worker name from the first object (Assuming your SQL join includes worker name)
+                // If your API doesn't return the name yet, we use a fallback
+                const workerName = data[0].name || "Worker"; 
+                document.getElementById('displayWorkerName').innerText = `${workerName} (${wId})`;
 
                 let tableHTML = `
                     <table>
                         <thead>
                             <tr>
-                                <th>Id</th>
-                                <th>Worker Id</th>
+                                <th>Ref ID</th>
+                                <th>Worker (ID)</th>
                                 <th>Date</th>
-                                <th>Admin Side Attendance</th>
-                                <th>Customer Side Attendance</th>
-                                <th>Status</th>
+                                <th>Admin Side</th>
+                                <th>Customer Side</th>
+                                <th>Sync Status</th>
                             </tr>
                         </thead>
                         <tbody>
                 `;
 
                 data.forEach((obj) => {
-                    const options = { 
-                        0: 'N/A', 
-                        1: 'Present', 
-                        2: 'Absent', 
-                        3: 'Half-Day', 
-                        4: 'Holiday' 
-                    };
+                    const options = { 0: 'N/A', 1: 'Present', 2: 'Absent', 3: 'Half-Day', 4: 'Holiday' };
 
-                    // Helper function to build the select dropdown
                     const buildSelect = (currentVal, type) => {
                         let sel = `<select onchange="updateLive(${workerId}, '${obj.attendance_date}', this)" data-type="${type}">`;
                         for (const [val, label] of Object.entries(options)) {
@@ -101,14 +160,14 @@
                     tableHTML += `
                         <tr id="row-${obj.attendance_date}">
                             <td>${obj.id || '---'}</td>
-                            <td>${wId}</td> 
-                            <td>${obj.attendance_date}</td>
+                            <td>${workerName} (${wId})</td>
+                            <td><strong>${obj.attendance_date}</strong></td>
                             <td>${buildSelect(obj.worker_attendance, 'worker')}</td>
                             <td>${buildSelect(obj.customer_side_attendance, 'customer')}</td>
                             <td class="sync-indicator">
                                 ${obj.id ? 
-                                    '<span style="color: green;" class="sync-status">✔ Synced</span>' : 
-                                    '<span style="color: gray;" class="sync-status">○ New</span>'
+                                    '<span style="color: #28a745;" class="sync-status">✔ Synced</span>' : 
+                                    '<span style="color: #6c757d;" class="sync-status">○ New</span>'
                                 }
                             </td>
                         </tr>`;
@@ -118,21 +177,17 @@
                 document.getElementById('result').innerHTML = tableHTML;
 
             } catch (error) {
-                console.error('Error:', error);
                 document.getElementById('result').innerHTML = '<p style="color:red;">Error fetching data.</p>';
             }
         }
 
-        // Replacement for markAttendance - this handles the Live Update
         async function updateLive(workerId, date, element) {
             const row = document.getElementById(`row-${date}`);
             const indicator = row.querySelector('.sync-indicator');
-            
-            // Get current values of both dropdowns in this row
             const workerVal = row.querySelector('select[data-type="worker"]').value;
             const customerVal = row.querySelector('select[data-type="customer"]').value;
 
-            indicator.innerHTML = '<span style="color: blue;">Saving...</span>';
+            indicator.innerHTML = '<span style="color: #007bff;">Saving...</span>';
 
             const formData = new URLSearchParams();
             formData.append('worker_id', workerId);
@@ -143,27 +198,18 @@
             try {
                 const response = await fetch('<?php echo base_url("api/submitAttendance"); ?>', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-                    },
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: formData
                 });
-
                 const result = await response.json();
-
-                if (result.status) {
-                    indicator.innerHTML = '<span style="color: green;" class="sync-status">✔ Saved</span>';
-                } else {
-                    indicator.innerHTML = '<span style="color: red;" class="sync-status">✘ Failed</span>';
-                    console.error("Save failed:", result.message);
-                }
+                indicator.innerHTML = result.status ? 
+                    '<span style="color: #28a745;" class="sync-status">✔ Saved</span>' : 
+                    '<span style="color: #dc3545;" class="sync-status">✘ Failed</span>';
             } catch (error) {
-                console.error('Error:', error);
-                indicator.innerHTML = '<span style="color: red;" class="sync-status">✘ Error</span>';
+                indicator.innerHTML = '<span style="color: #dc3545;" class="sync-status">✘ Error</span>';
             }
         }
 
-        // Initial Load
         fetchData(wId);
     </script>
 </body>
