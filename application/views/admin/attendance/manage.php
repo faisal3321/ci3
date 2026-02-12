@@ -84,8 +84,8 @@
     <script>
         const wId = "<?php echo $workerId; ?>";
 
-        function toggleFilter(event) {
-            event.stopPropagation();
+        function toggleFilter(e) {
+            e.stopPropagation();
             const popup = document.getElementById('dateFilterPopup');
             popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
         }
@@ -104,9 +104,9 @@
             fetchData(wId);
         }
 
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function(e) {
             const popup = document.getElementById('dateFilterPopup');
-            if (popup && !popup.contains(event.target)) {
+            if (popup && !popup.contains(e.target)) {
                 popup.style.display = 'none';
             }
         });
@@ -126,8 +126,6 @@
                     return;
                 }
 
-                // Get worker name from the first object (Assuming your SQL join includes worker name)
-                // If your API doesn't return the name yet, we use a fallback
                 const workerName = data[0].name || "Worker"; 
                 document.getElementById('displayWorkerName').innerText = `${workerName} (${wId})`;
 
