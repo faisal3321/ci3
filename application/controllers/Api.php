@@ -220,12 +220,14 @@ class Api extends RestController {
 	// save attendance
 	public function submitAttendance_post()
 	{
-		// Try to get data from post, if null, the frontend isn't sending it right
 		$worker_id = $this->post('worker_id');
 		$date = $this->post('attendance_date');
 
 		if (!$worker_id || !$date) {
-			return $this->set_response(['status' => FALSE, 'message' => 'Missing Data'], 400);
+			return $this->set_response([
+				'status' => FALSE, 
+				'message' => 'Missing Data'
+			], 400);
 		}
 
 		$data = [
