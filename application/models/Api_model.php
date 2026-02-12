@@ -28,16 +28,8 @@ class Api_model extends CI_Model {
         // ];
 		// return $result;
 
-        // $query = $this->db->get('workers');
-        // return $query->result_array();
-
-        $sql = "SELECT * FROM workers";
-        
-        // Execute the query
-        $query = $this->db->query($sql);
-        
-        // Return the results as an associative array
-        return $query->result_array();
+        $query =  $this->db->get('workers');
+		return $query->result_array();
 	}
 
 
@@ -49,21 +41,49 @@ class Api_model extends CI_Model {
         // $query = $this->db->query($sql);
         // // Return the results as an associative array
         // return $query->result_array();
-
-		// This replaces the entire block of raw SQL
-		return $this->db->get_where('workers', ['id' => $wrkId])
-        	->result_array();
+		
+		$query = $this->db->get_where('workers', ['id' => $wrkId]);
+        return $query->result_array();
     }
+
+
+
+	// create worker or add worker
+	public function insertWorker($data)
+	{
+		return $this->db->insert('workers', $data);
+	}
+
+
+
+	// delete worker
+	public function deleteWorker($id)
+	{
+		return $this->db->where('id', $id)->delete('workers');
+	}
+
+
+
+	// update worker
+	public function updateWorker($id, $data)
+	{
+		return $this->db->where('id', $id)->update('workers', $data);
+	}
 
 
 
 	public function manageWorkerAttendance($workerId, $startDate = NULL, $endDate = NULL)
 	{
-		// Ensure today's date exists in the calendar
+		// to make sure today's date is present in the calendar
 		$this->generateCalendar();
 
-		// Get worker info to know when the joining date
+		// get worker information to know when the joining date
 		$worker = $this->db->select('created_at')->get_where('workers', ['id' => $workerId])->row();
+
+		if (!$worker) {
+			return [];
+		}
+
 		$joiningDate = date('Y-m-d', strtotime($worker->created_at));
 		$today = date('Y-m-d');
 
@@ -141,27 +161,7 @@ class Api_model extends CI_Model {
 
 
 
-	// create worker or add worker
-	public function insertWorker($data)
-	{
-		return $this->db->insert('workers', $data);
-	}
-
-	// delete worker
-	public function deleteWorker($id)
-	{
-		$this->db->where('id', $id);
-		return $this->db->delete('workers');
-	}
-
-
-
-	// update worker
-	public function updateWorker($id, $data)
-	{
-		$this->db->where('id', $id);
-		return $this->db->update('workers', $data);
-	}
+	
 
 
 	
