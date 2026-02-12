@@ -127,7 +127,8 @@ class Api_model extends CI_Model {
 		', FALSE);
 
 		$this->db->from('calendar c');
-		$this->db->join('attendance a', 'a.attendance_date = c.calendar_date AND a.worker_id = ' . $this->db->escape($workerId), 'inner');
+		$this->db->join('attendance a', 'a.attendance_date = c.calendar_date', 'inner');
+		$this->db->where('a.worker_id', $workerId);
 
 		$this->db->where('c.calendar_date >= ', $joiningDate);
 		$this->db->where('c.calendar_date <= ', $today);
