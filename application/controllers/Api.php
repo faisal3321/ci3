@@ -8,6 +8,17 @@ class Api extends RestController {
     function __construct(){
         parent::__construct();
         $this->load->model('Api_model', 'api');
+		$this->load->library('RateLimiter', NULL, 'rl'); // in library alias is third parameter
+
+		$identifier = $this->input->ip_address();
+
+		if (!$this->rl->allowRequest($identifier)) {
+			$this->set_response([
+				'status' => FALSE,
+				'message' => 'Too many requests. Please try again later.'
+			], 429);
+			exit;
+		}
     }
 
 	/**
@@ -185,6 +196,11 @@ class Api extends RestController {
 	// Worker List
 	public function workerlist_get()
 	{
+		// throttle
+		$ip = $this->input->ip_address();
+    	$this->rl->throttle($ip);
+
+
         $res = $this->api->allWorkerData();
         $data = [
             'message' => 'OK',
