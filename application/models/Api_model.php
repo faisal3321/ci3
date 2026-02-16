@@ -31,6 +31,40 @@ class Api_model extends CI_Model {
         return $this->db->get('workers')->result_array();
 	}
 
+	public function workersPaginationServerSide($start, $length, $search, $order_col, $order_dir)
+	{
+		// 1. Total records (without filtering)
+		$totalRecords = $this->db->count_all('workers');
+
+		// 2. Start building query for filtered data
+		$this->db->from('workers');
+
+		// Search Logic
+		if (!empty($search)) {
+			$this->db->group_start();
+			$this->db->like('id', $search);
+			$this->db->or_like('name', $search);
+			$this->db->or_like('phone', $search);
+			$this->db->or_like('address', $search);
+			$this->db->group_end();
+		}
+
+		// Get count of filtered results before applying limit
+		$totalFiltered = $this->db->count_all_results('', FALSE);
+
+		// 3. Sorting and Pagination
+		$this->db->order_by($order_col, $order_dir);
+		$this->db->limit($length, $start);
+		
+		$query = $this->db->get();
+
+		return [
+			'totalRecords' => $totalRecords,
+			'totalFiltered' => $totalFiltered,
+			'data'          => $query->result_array()
+		];
+	}
+
 
 
     public function singleWorkerData($wrkId)
@@ -174,7 +208,7 @@ class Api_model extends CI_Model {
 
 		// Set to India Time
     	date_default_timezone_set('Asia/Kolkata');
-		
+
 		$now = date('Y-m-d H:i:s');
 		$today = date('Y-m-d');
 		$dayOfWeek = date('w', strtotime($today));

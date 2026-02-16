@@ -17,7 +17,7 @@
 </head>
 <body>
 
-    <h1>Hello worker list...</h1>
+    <h1>Hello worker list 2</h1>
 
     <div id="table-error"></div>
     
@@ -61,16 +61,18 @@
 
 
 <script>
-    const url = '<?php echo base_url("api/workerlist"); ?>';
+    const url = '<?php echo base_url("api/workerlist1"); ?>';
 
     $(document).ready(function() {
 
         $.fn.dataTable.ext.errMode = 'none';
 
         $('#workerTable').DataTable({
+            processing: true,
+            serverSide: true,
             ajax: {
                 url: url,
-                type: 'GET',
+                type: 'POST',
                 dataSrc: 'data', // api return data       
                 error: (xhr) => ApiError.handle(xhr, 'Quota reached. Please refresh the page in a few moments.')        
             },
@@ -83,6 +85,7 @@
                 { data: 'address' },
                 {
                     data: 'id',
+                    orderable: false,
                     render: function(data) {
                         return `
                             <a href="<?php echo base_url('worker/manage/'); ?>${data}" target="_blank">📋</a><br>

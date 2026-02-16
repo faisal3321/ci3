@@ -193,7 +193,7 @@ class Api extends RestController {
 
 
 
-	// Worker List
+	// Show Worker List
 	public function workerlist_get()
 	{
 		// throttle
@@ -208,6 +208,41 @@ class Api extends RestController {
             'data' => $res
         ];
         $this->set_response($data, 200);
+	}
+
+
+	public function workerlist1_post()
+	{
+		// throttle
+		$ip = $this->input->ip_address();
+    	$this->rl->throttle($ip);
+
+		// Capture DataTables inputs
+		$draw   = $this->input->post('draw');
+		$start  = $this->input->post('start');
+		$length = $this->input->post('length');
+		$search = $this->input->post('search')['value'];
+		
+		// Get Order details (which column to sort by)
+		$order_column_index = $this->input->post('order')[0]['column'];
+		$order_dir = $this->input->post('order')[0]['dir'];
+		
+		// Map column index to actual DB column name
+		$columns = array('id', 'name', 'age', 'phone', 'gender', 'address');
+		$order_col = $columns[$order_column_index];
+
+		// Get processed data from Model
+		$result = $this->api->workersPaginationServerSide($start, $length, $search, $order_col, $order_dir);
+
+		// response
+		$response = [
+			"draw"            => intval($draw),
+			"recordsTotal"    => $result['totalRecords'],
+			"recordsFiltered" => $result['totalFiltered'],
+			"data"            => $result['data']
+		];
+
+		$this->set_response($response, 200);
 	}
 
 
