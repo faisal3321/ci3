@@ -171,6 +171,10 @@ class Api_model extends CI_Model {
 	// generate calendar
 	public function generateCalendar()
 	{
+
+		// Set to India Time
+    	date_default_timezone_set('Asia/Kolkata');
+		
 		$now = date('Y-m-d H:i:s');
 		$today = date('Y-m-d');
 		$dayOfWeek = date('w', strtotime($today));

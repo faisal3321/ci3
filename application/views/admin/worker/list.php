@@ -2,12 +2,16 @@
 <html>
 <head>
     <title>Worker List</title>
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+    <!-- DataTables Buttons CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+
+
     <style>
         body { font-family: sans-serif; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f8f9fa; color: #333; }
-        tr:hover { background-color: #f1f1f1; }
         .btn-add { padding: 10px 15px; background: #28a745; color: white; text-decoration: none; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
     </style>
 </head>
@@ -15,105 +19,170 @@
 
     <h1>Hello worker list...</h1>
     
-    <a href='<?php echo base_url("worker/add"); ?>' class="btn-add">Add Worker</a>
+    <a href="<?php echo base_url('worker/add'); ?>" class="btn-add">Add Worker</a>
 
-    <div id="result">
-        <p>Loading data...</p>
-    </div>
+    <table id="workerTable" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Phone</th>
+                <th>Gender</th>
+                <th>Address</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
-    <script>
-        const url = '<?php echo base_url("api/workerlist"); ?>';
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 
-        async function fetchData() {
-            try {
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
-                if (!response.ok) throw new Error('Network response was not ok');
+    <!-- DataTables Buttons JS -->
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 
-                const result = await response.json();
-                
+    <!-- Required for Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
-                data = result.data;
+    <!-- Required for PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 
-                
-                // create table header
-                let tableHTML = `
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Age</th>
-                                <th>Phone</th>
-                                <th>Gender</th>
-                                <th>Address</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
 
-                data.forEach((obj,ind)=>{
-                    tableHTML += `<tr>
-                                    <td>${obj.id}</td>
-                                    <td>${obj.name}</td>
-                                    <td>${obj.age}</td>
-                                    <td>${obj.phone}</td>
-                                    <td>${obj.gender}</td>
-                                    <td>${obj.address}</td>
-                                    <td>
-                                        <a href='<?php echo base_url("worker/manage/"); ?>${obj.id}' target="_blank">📋</a> <br>
-                                        <a href='<?php echo base_url("worker/add/"); ?>${obj.id}'>✏️</a> <br>
-                                        <a href="javascript:void(0);" onclick="deleteWorker(${obj.id})" style="color:red;">🗑️</a>
-                                    </td>
-                                </tr>`;  
-                })
+<script>
+    const url = '<?php echo base_url("api/workerlist"); ?>';
 
-                tableHTML += `</tbody>
-                            </table>`;             
+    $(document).ready(function() {
 
-                
-                document.getElementById('result').innerHTML = tableHTML;
-
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('result').innerHTML = '<p style="color:red;">Error fetching data.</p>';
-            }
-        }
-
-        async function deleteWorker(id) {
-            if (!confirm(`Are you sure you want to delete this worker?`)) return;
-
-            // Use proper RESTful URL pattern
-            const deleteUrl = `<?php echo base_url('api/deleteWorker/'); ?>${id}`;
-                                    
-            try {
-                const response = await fetch(deleteUrl, {
-                    method: 'DELETE', 
-                    headers: {
-                        'Content-Type': 'application/json'
+        $('#workerTable').DataTable({
+            ajax: {
+                url: url,
+                type: 'GET',
+                dataSrc: 'data' // api return data }
+            },
+            columns: [
+                { data: 'id' },
+                { data: 'name' },
+                { data: 'age' },
+                { data: 'phone' },
+                { data: 'gender' },
+                { data: 'address' },
+                {
+                    data: 'id',
+                    render: function(data) {
+                        return `
+                            <a href="<?php echo base_url('worker/manage/'); ?>${data}" target="_blank">📋</a><br>
+                            <a href="<?php echo base_url('worker/add/'); ?>${data}">✏️</a><br>
+                            <a href="javascript:void(0);" onclick="deleteWorker(${data})" style="color:red;">🗑️</a>
+                        `;
                     }
-                });
-
-                const result = await response.json();
-
-                if (result.status) {
-                    alert(result.message);
-                    fetchData(); 
-                } else {
-                    alert('Error: ' + result.message);
                 }
-                
-            } catch (error) {
-                console.error('Error: ', error);
-                alert('Something went wrong, could not delete worker');
-            }
-        }
+            ],
 
-    fetchData();
-    </script>
+            // button for download or export data.
+            dom: 'Bfrtip',
+
+            buttons: [
+                {
+                    extend: 'csv',
+                    text: 'Download CSV',
+                    exportOptions: {
+                        columns: [0,1,2,3,4,5] // exclude Action column
+                    }
+                },
+                {
+                    extend: 'excel',
+                    text: 'Download Excel',
+                    exportOptions: {
+                        columns: [0,1,2,3,4,5]
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    text: 'Download PDF',
+                    exportOptions: {
+                        columns: [0,1,2,3,4,5]
+                    }
+                },
+                {
+                    extend: 'print',
+                    text: 'Print',
+                    exportOptions: {
+                        columns: [0,1,2,3,4,5]
+                    }
+                }
+            ],
+
+            pageLength: 5,
+            lengthMenu: [5, 10, 25, 50],
+            responsive: true
+        });
+
+    });
+
+    async function deleteWorker(id) {
+        if (!confirm('Are you sure you want to delete this worker?')) return;
+
+        const deleteUrl = `<?php echo base_url('api/deleteWorker/'); ?>${id}`;
+
+        try {
+            const response = await fetch(deleteUrl, { method: 'DELETE' });
+            const result = await response.json();
+
+            if (result.status) {
+                alert(result.message);
+                
+                // Reload table without refreshing page
+                $('#workerTable').DataTable().ajax.reload();
+            } else {
+                alert(result.message);
+            }
+
+        } catch (error) {
+            alert('Something went wrong');
+        }
+    }
+</script>
+
+
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
