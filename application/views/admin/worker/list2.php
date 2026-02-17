@@ -68,6 +68,7 @@
         $.fn.dataTable.ext.errMode = 'none';
 
         $('#workerTable').DataTable({
+            stateSave: true,
             processing: true,
             serverSide: true,
             ajax: {
@@ -130,8 +131,8 @@
                 }
             ],
 
-            pageLength: 5,
-            lengthMenu: [5, 10, 25, 50],
+            pageLength: 10,
+            lengthMenu: [10, 25, 50, 100],
             responsive: true
         });
 
@@ -150,7 +151,7 @@
                 alert(result.message);
                 
                 // Reload table without refreshing page
-                $('#workerTable').DataTable().ajax.reload();
+                $('#workerTable').DataTable().ajax.reload(null, false);
             } else {
                 alert(result.message);
             }
