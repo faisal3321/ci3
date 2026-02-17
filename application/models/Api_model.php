@@ -121,7 +121,7 @@ class Api_model extends CI_Model {
 		$today = date('Y-m-d');
 
 		// auto-sync
-		$this->db->select('calendar_date, is_weekend');
+		$this->db->select('id, calendar_date, is_weekend');
 		$this->db->from('calendar');
 		$this->db->where('calendar_date >=', $joiningDate);
 		$this->db->where('calendar_date <=', $today);
@@ -130,7 +130,7 @@ class Api_model extends CI_Model {
 		foreach ($allDates as $date) {
 			$check = $this->db->get_where('attendance', [
 				'worker_id' => $workerId, 
-				'attendance_date' => $date->calendar_date
+				'attendance_date' => $date->id
 			])->num_rows();
 
 			if ($check == 0) {
@@ -140,7 +140,7 @@ class Api_model extends CI_Model {
 
 				$this->db->insert('attendance', [
 					'worker_id' => $workerId,
-					'attendance_date' => $date->calendar_date,
+					'attendance_date' => $date->id,
 					'worker_attendance' => $defaultWorker,
 					'customer_side_attendance' => $defaultCust,
 					'created_at' => date('Y-m-d H:i:s'),
@@ -154,6 +154,7 @@ class Api_model extends CI_Model {
 			a.id,
 			a.worker_id,
 			w.name,
+			c.id as calendar_id,
 			c.calendar_date as attendance_date,
 			c.is_weekend,
 			a.worker_attendance,
@@ -161,7 +162,7 @@ class Api_model extends CI_Model {
 		', FALSE);
 
 		$this->db->from('calendar c');
-		$this->db->join('attendance a', 'a.attendance_date = c.calendar_date', 'inner');
+		$this->db->join('attendance a', 'a.attendance_date = c.id', 'inner');
 		$this->db->join('workers w', 'w.id = a.worker_id', 'inner');
 
 		$this->db->where('a.worker_id', $workerId);
@@ -205,33 +206,42 @@ class Api_model extends CI_Model {
 	// generate calendar
 	public function generateCalendar()
 	{
-
 		// Set to India Time
-    	date_default_timezone_set('Asia/Kolkata');
+		date_default_timezone_set('Asia/Kolkata');
 
-		$now = date('Y-m-d H:i:s');
-		$today = date('Y-m-d');
-		$dayOfWeek = date('w', strtotime($today));
+		$startDate = new DateTime('2026-01-01');
+		$endDate   = new DateTime(); // Today
+		
+		// We use <= to ensure it includes today's date
+		while ($startDate <= $endDate) {
+			$currentDateString = $startDate->format('Y-m-d');
+			
+			// Check if this specific date in the loop exists
+			$exist = $this->db->get_where('calendar', ['calendar_date' => $currentDateString])->num_rows();
 
-		$insertDate = [
-			'calendar_date'		=> $today,
-			'day'				=> date('l'),
-			'month'				=> date('F'),
-			'year'				=> date('Y'),
-			'is_weekend'		=> ($dayOfWeek == 0) ? 1 : 0,
-			'created_at'		=> $now,
-			'updated_at'		=> $now
-		];
+			if (!$exist) {
+				$dayOfWeek = $startDate->format('w'); // 0 for Sunday
+				$now = date('Y-m-d H:i:s');
 
-		// check if date already exist to prevent duplication
-		$exist = $this->db->get_where('calendar', ['calendar_date' => $today])->num_rows();
+				$insertDate = [
+					'calendar_date' => $currentDateString,
+					'day'           => $startDate->format('l'),
+					'month'         => $startDate->format('F'),
+					'year'          => $startDate->format('Y'),
+					'is_weekend'    => ($dayOfWeek == 0) ? 1 : 0, // Only Sunday is 1
+					'created_at'    => $now,
+					'updated_at'    => $now
+				];
 
-		if(!$exist) {
-			$this->db->insert('calendar', $insertDate);
+				$this->db->insert('calendar', $insertDate);
+			}
+
+			// Move to the next day in the loop
+			$startDate->modify('+1 day');
 		}
 
-		// fetch the data in descending order
-		$this->db->order_by('id', 'DESC');
+		// Fetch the data in descending order to return to your API
+		$this->db->order_by('calendar_date', 'DESC');
 		$query = $this->db->get('calendar'); 
 		
 		return $query->result();

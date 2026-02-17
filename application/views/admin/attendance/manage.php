@@ -135,7 +135,7 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Worker (ID)</th>
-                                <th>Date</th>
+                                <th>Attendance Date</th>
                                 <th>Admin Side Attendance</th>
                                 <th>Customer Side Attendance</th>
                                 <th>Sync Status</th>
@@ -147,8 +147,8 @@
                 data.forEach((obj) => {
                     const options = { 0: 'N/A', 1: 'Present', 2: 'Absent', 3: 'Half-Day', 4: 'Holiday' };
 
-                    const buildSelect = (currentVal, type) => {
-                        let sel = `<select onchange="updateLive(${workerId}, '${obj.attendance_date}', this)" data-type="${type}">`;
+                    const buildSelect = (currentVal, type, calId) => {
+                        let sel = `<select onchange="updateLive(${wId}, ${obj.calendar_id}, this)" data-type="${type}">`;
                         for (const [val, label] of Object.entries(options)) {
                             sel += `<option value="${val}" ${currentVal == val ? 'selected' : ''}>${label}</option>`;
                         }
@@ -156,19 +156,16 @@
                     };
 
                     tableHTML += `
-                        <tr id="row-${obj.attendance_date}">
-                            <td>${obj.id || '---'}</td>
-                            <td>${workerName} <br> ( id: ${wId} )</td>
-                            <td><strong>${obj.attendance_date}</strong></td>
-                            <td>${buildSelect(obj.worker_attendance, 'worker')}</td>
-                            <td>${buildSelect(obj.customer_side_attendance, 'customer')}</td>
-                            <td class="sync-indicator">
-                                ${obj.id ? 
-                                    '<span style="color: #28a745;" class="sync-status">✔ Synced</span>' : 
-                                    '<span style="color: #6c757d;" class="sync-status">○ New</span>'
-                                }
-                            </td>
-                        </tr>`;
+                                <tr id="row-${obj.calendar_id}">
+                                    <td>${obj.id || '---'}</td>
+                                    <td>${workerName} <br> ( id: ${wId} )</td>
+                                    <td><strong>${obj.attendance_date}</strong></td> 
+                                    <td>${buildSelect(obj.worker_attendance, 'worker', obj.calendar_id)}</td>
+                                    <td>${buildSelect(obj.customer_side_attendance, 'customer', obj.calendar_id)}</td>
+                                    <td class="sync-indicator">
+                                        <span style="color: #28a745;" class="sync-status">✔ Synced</span>
+                                    </td>
+                                </tr>`;
                 });
 
                 tableHTML += `</tbody></table>`;
@@ -179,9 +176,11 @@
             }
         }
 
-        async function updateLive(workerId, date, element) {
-            const row = document.getElementById(`row-${date}`);
+        async function updateLive(workerId, calendarId, element) {
+            const row = document.getElementById(`row-${calendarId}`);
             const indicator = row.querySelector('.sync-indicator');
+            
+            // Define values from the row
             const workerVal = row.querySelector('select[data-type="worker"]').value;
             const customerVal = row.querySelector('select[data-type="customer"]').value;
 
@@ -189,7 +188,7 @@
 
             const formData = new URLSearchParams();
             formData.append('worker_id', workerId);
-            formData.append('attendance_date', date);
+            formData.append('attendance_date', calendarId); // This is the ID for the DB
             formData.append('worker_attendance', workerVal);
             formData.append('customer_side_attendance', customerVal);
 
