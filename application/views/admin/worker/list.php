@@ -68,6 +68,7 @@
         $.fn.dataTable.ext.errMode = 'none';
 
         $('#workerTable').DataTable({
+            stateSave: true,
             ajax: {
                 url: url,
                 type: 'GET',
@@ -147,7 +148,7 @@
                 alert(result.message);
                 
                 // Reload table without refreshing page
-                $('#workerTable').DataTable().ajax.reload();
+                $('#workerTable').DataTable().ajax.reload(null, false);
             } else {
                 alert(result.message);
             }
