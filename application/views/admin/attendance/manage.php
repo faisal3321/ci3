@@ -205,6 +205,8 @@
             } catch (error) {
                 indicator.innerHTML = '<span style="color: #dc3545;" class="sync-status">✘ Error</span>';
             }
+            const result = await response.json();
+            console.log("SQL Executed:", result.debug_query);   
         }
 
         fetchData(wId);
