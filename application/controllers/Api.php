@@ -1,10 +1,12 @@
 <?php
 
 use chriskacerguis\RestServer\RestController;
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Api extends RestController {
 
+class Api extends RestController {
+	
     function __construct(){
         parent::__construct();
         $this->load->model('Api_model', 'api');
@@ -99,7 +101,6 @@ class Api extends RestController {
 			'updated_at'	=> $now
 		];
 
-
 		// simple validation
 		if (empty($updateData['name']) || empty($updateData['age']) || empty($updateData['gender']) || empty($updateData['phone'])) {
 			$this->set_response([
@@ -123,7 +124,6 @@ class Api extends RestController {
 				'message'		=> 'Worker Updation Failed'
 			], 500);
 		}
-
 	}
 
 
@@ -278,7 +278,6 @@ class Api extends RestController {
 			'status'		=> TRUE,
 			'data'			=> $res
 		], 200);
-        
 	}
 
 
@@ -334,6 +333,4 @@ class Api extends RestController {
 			], 409);
 		}
 	}
-
-    
 }
