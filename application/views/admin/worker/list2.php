@@ -60,107 +60,107 @@
     <script src="<?php echo base_url('assets/js/utils.js'); ?>"></script>
 
 
-<script>
-    const url = '<?php echo base_url("api/workerlist1"); ?>';
+    <script>
+        const url = '<?php echo base_url("api/workerlist1"); ?>';
 
-    $(document).ready(function() {
+        $(document).ready(function() {
 
-        $.fn.dataTable.ext.errMode = 'none';
+            $.fn.dataTable.ext.errMode = 'none';
 
-        $('#workerTable').DataTable({
-            stateSave: true,
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: url,
-                type: 'POST',
-                dataSrc: 'data', // api return data       
-                error: (xhr) => ApiError.handle(xhr, 'Quota reached. Please refresh the page in a few moments.')        
-            },
-            columns: [
-                { data: 'id' },
-                { data: 'name' },
-                { data: 'age' },
-                { data: 'phone' },
-                { data: 'gender' },
-                { data: 'address' },
-                {
-                    data: 'id',
-                    orderable: false,
-                    render: function(data) {
-                        return `
-                            <a href="<?php echo base_url('worker/manage/'); ?>${data}" target="_blank">📋</a><br>
-                            <a href="<?php echo base_url('worker/add/'); ?>${data}">✏️</a><br>
-                            <a href="javascript:void(0);" onclick="deleteWorker(${data})" style="color:red;">🗑️</a>
-                        `;
-                    }
-                }
-            ],
-
-            // button for download or export data.
-            dom: 'Bfrtip',
-
-            buttons: [
-                {
-                    extend: 'csv',
-                    text: 'Download CSV',
-                    exportOptions: {
-                        columns: [0,1,2,3,4,5] // exclude Action column
-                    }
+            $('#workerTable').DataTable({
+                stateSave: true,
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: url,
+                    type: 'POST',
+                    dataSrc: 'data', // api return data       
+                    error: (xhr) => ApiError.handle(xhr, 'Quota reached. Please refresh the page in a few moments.')        
                 },
-                {
-                    extend: 'excel',
-                    text: 'Download Excel',
-                    exportOptions: {
-                        columns: [0,1,2,3,4,5]
+                columns: [
+                    { data: 'id' },
+                    { data: 'name' },
+                    { data: 'age' },
+                    { data: 'phone' },
+                    { data: 'gender' },
+                    { data: 'address' },
+                    {
+                        data: 'id',
+                        orderable: false,
+                        render: function(data) {
+                            return `
+                                <a href="<?php echo base_url('worker/manage/'); ?>${data}" target="_blank">📋</a><br>
+                                <a href="<?php echo base_url('worker/add/'); ?>${data}">✏️</a><br>
+                                <a href="javascript:void(0);" onclick="deleteWorker(${data})" style="color:red;">🗑️</a>
+                            `;
+                        }
                     }
-                },
-                {
-                    extend: 'pdf',
-                    text: 'Download PDF',
-                    exportOptions: {
-                        columns: [0,1,2,3,4,5]
-                    }
-                },
-                {
-                    extend: 'print',
-                    text: 'Print',
-                    exportOptions: {
-                        columns: [0,1,2,3,4,5]
-                    }
-                }
-            ],
+                ],
 
-            pageLength: 10,
-            lengthMenu: [10, 25, 50, 100],
-            responsive: true
+                // button for download or export data.
+                dom: 'Bfrtip',
+
+                buttons: [
+                    {
+                        extend: 'csv',
+                        text: 'Download CSV',
+                        exportOptions: {
+                            columns: [0,1,2,3,4,5] // exclude Action column
+                        }
+                    },
+                    {
+                        extend: 'excel',
+                        text: 'Download Excel',
+                        exportOptions: {
+                            columns: [0,1,2,3,4,5]
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        text: 'Download PDF',
+                        exportOptions: {
+                            columns: [0,1,2,3,4,5]
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print',
+                        exportOptions: {
+                            columns: [0,1,2,3,4,5]
+                        }
+                    }
+                ],
+
+                pageLength: 10,
+                lengthMenu: [10, 25, 50, 100],
+                responsive: true
+            });
+
         });
 
-    });
+        async function deleteWorker(id) {
+            if (!confirm('Are you sure you want to delete this worker?')) return;
 
-    async function deleteWorker(id) {
-        if (!confirm('Are you sure you want to delete this worker?')) return;
+            const deleteUrl = `<?php echo base_url('api/deleteWorker/'); ?>${id}`;
 
-        const deleteUrl = `<?php echo base_url('api/deleteWorker/'); ?>${id}`;
+            try {
+                const response = await fetch(deleteUrl, { method: 'DELETE' });
+                const result = await response.json();
 
-        try {
-            const response = await fetch(deleteUrl, { method: 'DELETE' });
-            const result = await response.json();
+                if (result.status) {
+                    alert(result.message);
+                    
+                    // Reload table without refreshing page
+                    $('#workerTable').DataTable().ajax.reload(null, false);
+                } else {
+                    alert(result.message);
+                }
 
-            if (result.status) {
-                alert(result.message);
-                
-                // Reload table without refreshing page
-                $('#workerTable').DataTable().ajax.reload(null, false);
-            } else {
-                alert(result.message);
+            } catch (error) {
+                alert('Something went wrong');
             }
-
-        } catch (error) {
-            alert('Something went wrong');
         }
-    }
-</script>
+    </script>
 
 
 </body>
