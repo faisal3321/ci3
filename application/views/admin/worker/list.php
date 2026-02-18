@@ -65,6 +65,7 @@
 
     $(document).ready(function() {
 
+
         $('#workerTable').DataTable({
             stateSave: true,
             ajax: {
@@ -86,7 +87,7 @@
                         return `
                             <a href="<?php echo base_url('worker/manage/'); ?>${data}" target="_blank">📋</a><br>
                             <a href="<?php echo base_url('worker/add/'); ?>${data}">✏️</a><br>
-                            <a href="javascript:void(0);" onclick="deleteWorker(${data})" style="color:red;">🗑️</a>
+                            <a href="javascript:void(0);" onclick="deleteWorker(${data})" >🗑️</a>
                         `;
                     }
                 }

@@ -200,13 +200,6 @@ class Api_model extends CI_Model {
 			return $this->db->insert('attendance', $data);
 		}
 
-		// Capture the last query run
-		$last_query = $this->db->last_query();
-
-		return [
-			'status' => $result,
-			'debug_query' => $last_query // You will see this in your Browser Console Network tab
-		];
 	}
 
 
