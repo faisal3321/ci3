@@ -1,4 +1,3 @@
-// assets/js/utils.js
 
 const ApiError = {
     // Centralized notification
@@ -19,7 +18,7 @@ const ApiError = {
         }
     },
 
-    // HTTP Status Resolver (The "Industry Standard" limit handler)
+    // HTTP Status Resolver 
     handle: function(xhr, customMsg = null) {
         
         let msg = customMsg; 
@@ -27,7 +26,7 @@ const ApiError = {
        
         const status = xhr.status || xhr.statusCode;
 
-        // If there's NO custom message, or if we want to override based on status
+        // If there is NO custom message, or if we want to override custom message based on status
         if (!msg) {
             if (status === 429) {
                 msg = "Rate limit reached. Please wait a moment before trying again.";

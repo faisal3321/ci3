@@ -65,8 +65,6 @@
 
     $(document).ready(function() {
 
-        $.fn.dataTable.ext.errMode = 'none';
-
         $('#workerTable').DataTable({
             stateSave: true,
             ajax: {
