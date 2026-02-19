@@ -33,7 +33,7 @@ class Api_model extends CI_Model {
 
 	public function workersPaginationServerSide($start, $length, $search, $order_col, $order_dir)
 	{
-		// 1. Total records (without filtering)
+		// total record
 		$totalRecords = $this->db->count_all('workers');
 
 		// 2. Start building query for filtered data
