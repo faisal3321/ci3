@@ -44,5 +44,10 @@ class Worker extends CI_Controller {
 		$this->load->view('admin/attendance/manage',$data);
 	}
 
+	public function workerHistory()
+	{
+		$this->load->view('admin/worker/workerHistory');
+	}
+
     
 }

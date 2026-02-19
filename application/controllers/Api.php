@@ -333,4 +333,31 @@ class Api extends RestController {
 			], 409);
 		}
 	}
+
+
+
+
+
+
+
+	// new thing to implements
+	// get worker history data
+	public function workerHistory_get()
+	{
+		$id = $this->get('id');
+		$res = $this->api->workerHistory($id);
+
+		if($res) {
+			$this->set_response([
+				'status'		=> TRUE,
+				'data'			=> $res[0]
+			], 200);
+		} else {
+			$this->set_response([
+				'status'		=> FALSE,
+				'message'		=> 'Something went wrong'
+			], 404);
+		}
+	}
+	
 }

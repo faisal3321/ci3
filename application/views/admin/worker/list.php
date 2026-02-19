@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<html>
 <head>
     <title>Worker List</title>
 
@@ -85,9 +83,10 @@
                     data: 'id',
                     render: function(data) {
                         return `
-                            <a href="<?php echo base_url('worker/manage/'); ?>${data}" target="_blank">📋</a><br>
-                            <a href="<?php echo base_url('worker/add/'); ?>${data}">✏️</a><br>
-                            <a href="javascript:void(0);" onclick="deleteWorker(${data})" >🗑️</a>
+                            <a href="<?php echo base_url('worker/manage/'); ?>${data}" target="_blank">📋 Manage</a><br>
+                            <a href="<?php echo base_url('worker/workerHistory/'); ?>${data}" target="_blank">📋 WH</a><br>
+                            <a href="<?php echo base_url('worker/add/'); ?>${data}">✏️ Edit</a><br>
+                            <a href="javascript:void(0);" onclick="deleteWorker(${data})" >🗑️ Delete</a>
                         `;
                     }
                 }
@@ -161,36 +160,3 @@
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
