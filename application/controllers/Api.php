@@ -344,18 +344,29 @@ class Api extends RestController {
 	// get worker history data
 	public function workerHistory_get()
 	{
-		$id = $this->get('id');
-		$res = $this->api->workerHistory($id);
+		// Get worker_id from the request 
+		$worker_id = $this->get('worker_id');
+		
+		// Check if worker_id is provided
+		if(!$worker_id) {
+			$this->set_response([
+				'status' => FALSE,
+				'message' => 'Worker ID is required'
+			], 400);
+			return;
+		}
+		
+		$res = $this->api->workerHistory($worker_id);
 
 		if($res) {
 			$this->set_response([
-				'status'		=> TRUE,
-				'data'			=> $res[0]
+				'status' => TRUE,
+				'data' => $res 
 			], 200);
 		} else {
 			$this->set_response([
-				'status'		=> FALSE,
-				'message'		=> 'Something went wrong'
+				'status' => FALSE,
+				'message' => 'No records found'
 			], 404);
 		}
 	}
