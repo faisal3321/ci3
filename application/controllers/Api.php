@@ -375,13 +375,13 @@ class Api extends RestController {
 	// Add worker History into table 
 	public function addWorkerHistory_post()
 	{
-		$worker_id = $this->post('worker_id') ? $this->post('worker_id') : ($this->get('worker_id') ? $this->get('worker_id') : $this->uri->segment(3));
+		$worker_id = $this->post('worker_id')? $this->post('worker_id') : $this->uri->segment(3);
 		
 		// Check if worker_id is provided
 		if(!$worker_id) {
 			$this->set_response([
 				'status' => FALSE,
-				'message' => 'Worker ID is required'
+				'message' => 'Worker ID is required' . $worker_id
 			], 400);
 			return;
 		}

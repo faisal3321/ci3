@@ -304,7 +304,9 @@ class Api_model extends CI_Model {
 		];
 
 		$this->db->insert('worker_history', $insertData);
-		return $this->db->insert_id();
+
+		$insertData['id'] = $this->db->insert_id();
+		return $insertData;
 	}
 
     
