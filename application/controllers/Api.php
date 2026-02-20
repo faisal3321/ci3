@@ -337,15 +337,13 @@ class Api extends RestController {
 
 
 
+	// ===========================     Worker History     ===============================
 
-
-
-	// new thing to implements
 	// get worker history data
 	public function workerHistory_get()
 	{
 		// Get worker_id from the request 
-		$worker_id = $this->get('worker_id');
+		$worker_id = $this->get('worker_id')? $this->get('worker_id') : $this->uri->segment(3);
 		
 		// Check if worker_id is provided
 		if(!$worker_id) {
@@ -368,6 +366,39 @@ class Api extends RestController {
 				'status' => FALSE,
 				'message' => 'No records found'
 			], 404);
+		}
+	}
+
+
+
+
+	// Add worker History into table 
+	public function addWorkerHistory_post()
+	{
+		$worker_id = $this->post('worker_id') ? $this->post('worker_id') : ($this->get('worker_id') ? $this->get('worker_id') : $this->uri->segment(3));
+		
+		// Check if worker_id is provided
+		if(!$worker_id) {
+			$this->set_response([
+				'status' => FALSE,
+				'message' => 'Worker ID is required'
+			], 400);
+			return;
+		}
+
+		$res = $this->api->addWorkerHistory($worker_id);
+
+		if($res) {
+			$this->set_response([
+				'status'		=> TRUE,
+				'message'		=> 'worker history added successfully',
+				'data'			=> $res
+			], 200);
+		} else {
+			$this->set_response([
+				'status'		=> FALSE,
+				'message'		=> 'Something went wrong'
+			], 400);
 		}
 	}
 	

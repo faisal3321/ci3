@@ -248,22 +248,63 @@ class Api_model extends CI_Model {
 		return $query->result();
 	}
 
+	// ========================    Worker History    ===========================
+
+
 	// public function workerHistory($worker_id) {
-
 	// 	$exist = $this->db->get_where('worker_history', ["worker_id" => $worker_id])->result_array();
-
 	// 	return $exist;
 	// }
     
 	public function workerHistory($worker_id) {
-		$this->db->select('worker_history.*, workers.name as worker_name');
-		$this->db->from('worker_history');
-		$this->db->join('workers', 'workers.id = worker_history.worker_id', 'inner');
-		$this->db->where('worker_history.worker_id', $worker_id);
+
+		$this->db->select('
+		wh.id,
+		wh.worker_id,
+		wh.work_start_date,
+		wh.work_end_date,
+		wh.isDeleted,
+		wh.createdAt,
+		wh.updatedAt, 
+		w.name as name');
+		$this->db->from('worker_history as wh');
+		$this->db->join('workers as w', 'w.id = wh.worker_id', 'inner');
+		$this->db->where('wh.worker_id', $worker_id);
 		
 		$exist = $this->db->get()->result_array();
 		
 		return $exist;
+	}
+
+	// Adding Worker History Table
+	public function addWorkerHistory($worker_id) {
+
+		// fetch worker_id and name from workers table to insert here
+		$this->db->select('name');
+		$this->db->where('id', $worker_id);
+		$worker = $this->db->get('workers')->row();
+
+		$name = ($worker) ? $worker->name : '';
+
+		// get date input sent from Ajax
+		$work_start_date = $this->input->post('work_start_date');
+		$work_end_date = $this->input->post('work_end_date');
+
+		$now = date('Y-m-d H:i:s');
+		$default_date = "0000-00-00 00:00:00";
+
+		$insertData = [
+			'worker_id'			=> $worker_id,
+			'name'				=> $name,
+			'work_start_date'	=> $work_start_date,
+			'work_end_date'		=> empty($work_end_date) ? $default_date : $work_end_date,
+			'isDeleted'			=> 0,
+			'createdAt'			=> $now,
+			'updatedAt'			=> $now
+		];
+
+		$this->db->insert('worker_history', $insertData);
+		return $this->db->insert_id();
 	}
 
     

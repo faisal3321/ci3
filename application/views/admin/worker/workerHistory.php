@@ -1,19 +1,40 @@
 <head>
     <title>worker history</title>
-
     <style>
         body { font-family: sans-serif; padding: 20px; }
-        .btn-add { padding: 10px 15px; background: #28a745; color: white; text-decoration: none; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+        
+        /* Flexbox wrapper to align Heading and Button */
+        .header-container { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+        }
+
+        .btn-add { 
+            padding: 10px 20px; 
+            background: #28a745; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 4px; 
+            font-weight: bold;
+        }
+        .btn-add:hover { background: #218838; }
+
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 8px; text-align: left; }
+        th, td { padding: 12px 8px; text-align: left; border: 1px solid #ddd; }
         th { background: #f2f2f2; }
     </style>
 </head>
 
 <body>
-    <h1>Worker History Page</h1>
 
-    <table border="1">
+    <div class="header-container">
+        <h1>Worker History Page</h1>
+        <a href="#" class="btn-add" onclick="addWorkerHistory()">+ Add Worker History</a>
+    </div>
+
+    <table>
         <thead>
             <tr>
                 <th>ID</th>
@@ -26,75 +47,76 @@
         </thead>
         <tbody id="worker-table-body">
             <tr>
-                <td colspan="5">Loading...</td> <!-- Changed colspan to 5 -->
+                <td colspan="6" style="text-align:center;">Loading...</td>
             </tr>
         </tbody>
     </table>
 
-    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 
     <script>
-        $(document).ready(function() {
-            // Extract worker_id from URL
-            var pathArray = window.location.pathname.split('/');
-            var worker_id = pathArray[pathArray.length - 1]; // Gets "30" from the URL
-            
-            loadWorkerHistory(worker_id);
+        let worker_id = "<?php echo $this->uri->segment(3); ?>";
+
+        $(document).ready(function() {  
+            if (worker_id) {
+                loadWorkerHistory(worker_id);
+            } else {
+                $('#worker-table-body').html('<tr><td colspan="6">Invalid Worker ID</td></tr>');
+            }
         });
 
         function loadWorkerHistory(worker_id) {
             $.ajax({
                 url: '<?php echo base_url("api/workerHistory"); ?>',
                 type: 'GET',
-                data: { worker_id: worker_id }, // Send worker_id from URL
+                data: { worker_id: worker_id },
                 dataType: 'json',
                 success: function(response) {
                     if(response.status) {
                         let data = response.data;
                         let html = '';
                         
-                        if(Array.isArray(data)) {
-                            data.forEach(function(item) {
-                                html += `
-                                    <tr id="row-${item.id}">
-                                        <td>${item.id || '---'}</td>
-                                        <td>${item.worker_id || '---'}</td>
-                                        <td>${item.work_start_date || '---'}</td>
-                                        <td>${item.work_end_date || '---'}</td>
-                                        <td>
-                                            <button onclick="editWorker(${item.id})">Edit</button>
-                                        </td>
-                                    </tr>
-                                `;
-                            });
-                        } else {
+                        // Ensure we are dealing with an array
+                        let items = Array.isArray(data) ? data : [data];
+
+                        items.forEach(function(item) {
                             html += `
-                                <tr id="row-${data.id}">
-                                    <td>${data.id || '---'}</td>
-                                    <td>${data.worker_id || '---'}</td>
-                                    <td>${data.work_start_date || '---'}</td>
-                                    <td>${data.work_end_date || '---'}</td>
+                                <tr id="row-${item.id}">
+                                    <td>${item.id || '---'}</td>
+                                    <td>${item.worker_id || '---'}</td>
+                                    <td>${item.name || '---'}</td>
+                                    <td>${item.work_start_date || '---'}</td>
+                                    <td>${item.work_end_date || '---'}</td>
                                     <td>
-                                        <button onclick="editWorker(${data.id})">Edit</button>
+                                        <button onclick="editWorkerHistory(${item.id})">Edit</button>
+                                        <button onclick="deleteWorkerHistory(${item.id})">Delete</button>
                                     </td>
                                 </tr>
                             `;
-                        }
+                        });
                         
                         $('#worker-table-body').html(html);
                     } else {
-                        $('#worker-table-body').html('<tr><td colspan="5">No data found</td></tr>');
+                        $('#worker-table-body').html('<tr><td colspan="6" style="text-align:center;">No data found</td></tr>');
                     }
                 },
                 error: function() {
-                    $('#worker-table-body').html('<tr><td colspan="5">Error loading data</td></tr>');
+                    $('#worker-table-body').html('<tr><td colspan="6" style="text-align:center;">No records found...</td></tr>');
                 }
             });
         }
-        
-        function editWorker(id) {
-            alert('Edit worker: ' + id); // Fixed alert
+
+        function addWorkerHistory() {
+            alert('Opening Add History form for Worker ID: ' + worker_id);
         }
+        
+        function editWorkerHistory(id) {
+            alert('Edit record ID: ' + id);
+        }
+
+        function deleteWorkerHistory(id) {
+            alert('Delete record ID: ' + id);
+        }
+
     </script>
 </body>
