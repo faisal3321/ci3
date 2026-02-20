@@ -281,6 +281,8 @@ class Api_model extends CI_Model {
 		$this->db->from('worker_history as wh');
 		$this->db->join('workers as w', 'w.id = wh.worker_id', 'inner');
 		$this->db->where('wh.worker_id', $worker_id);
+		// only show not deleted column
+		$this->db->where('wh.isDeleted', '0');
 		
 		$exist = $this->db->get()->result_array();
 		
@@ -309,7 +311,7 @@ class Api_model extends CI_Model {
 			'name'				=> $name,
 			'work_start_date'	=> $work_start_date,
 			'work_end_date'		=> empty($work_end_date) ? $default_date : $work_end_date,
-			'isDeleted'			=> 0,
+			'isDeleted'			=> "0",
 			'createdAt'			=> $now,
 			'updatedAt'			=> $now
 		];
@@ -321,16 +323,26 @@ class Api_model extends CI_Model {
 	}
 
 
-
 	// edit worker history
 	public function editWorkerHistory($id, $work_start_date, $work_end_date)
 	{
 		$data = [
 			'work_start_date'	=> $work_start_date,
 			'work_end_date'		=> $work_end_date,
-			'updatedAt'       => date('Y-m-d H:i:s')
+			'updatedAt'       	=> date('Y-m-d H:i:s')
 		];
 
+		return $this->db->where('id', $id)->update('worker_history', $data);
+	}
+
+
+	// Soft delete worker history
+	public function deleteWorkerHistory($id)
+	{
+		 $data = [
+			'isDeleted' => '1',
+			'updatedAt' => date('Y-m-d H:i:s')
+    	];
 		return $this->db->where('id', $id)->update('worker_history', $data);
 	}
 

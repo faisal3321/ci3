@@ -337,8 +337,21 @@ class Api extends RestController {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 	// ===========================     Worker History     ===============================
 
+	
 	// get worker history data
 	public function workerHistory_get()
 	{
@@ -368,8 +381,6 @@ class Api extends RestController {
 			], 404);
 		}
 	}
-
-
 
 
 	// Add worker History into table 
@@ -427,6 +438,36 @@ class Api extends RestController {
 			$this->set_response([
 				'status'		=> FALSE,
 				'message'		=> 'updation failed ! Something went wrong'
+			], 400);
+		}
+	}
+
+
+	// delete worker history
+	public function deleteWorkerHistory_delete($id = null)
+	{
+		if( $id == null) {
+			$this->get('id');
+		}
+
+		if(!$id) {
+			$this->set_response([
+				'status'			=> FALSE,
+				'message'			=> 'Invalid ID'
+			], 400);
+		}
+
+		$res = $this->api->deleteWorkerHistory($id);
+		
+		if($res) {
+			$this->set_response([
+				'status'		=> TRUE,
+				'message'		=> 'Worker history row deleted successfully.'
+			], 200);
+		} else {
+			$this->set_response([
+				'status'		=> FALSE,
+				'message'		=> 'Something went wrong !'
 			], 400);
 		}
 	}

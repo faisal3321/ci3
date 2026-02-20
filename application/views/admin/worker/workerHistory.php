@@ -117,7 +117,7 @@
 
         function loadWorkerHistory(worker_id) {
             $.ajax({
-                url: '<?php echo base_url("api/workerHistory"); ?>',
+                url: '<?php echo base_url("api/workerHistory/"); ?>',
                 type: 'GET',
                 data: { worker_id: worker_id },
                 dataType: 'json',
@@ -209,7 +209,7 @@
             let row = $('#row-' + id);
             let startDate = row.find('td:eq(3)').text().trim();
             let endDate = row.find('td:eq(4)').text().trim();
-            
+
 
             // Extract only the date part (YYYY-MM-DD) if it's a datetime string
             if (startDate && startDate.includes(' ')) {
@@ -247,8 +247,29 @@
 
 
         function deleteWorkerHistory(id) {
-            alert('Delete record ID: ' + id);
+            if(confirm('Are you sure you want to delete this record ?')) {
+                $.ajax({
+                    url: '<?php echo base_url("api/deleteWorkerHistory/"); ?>' + id,  
+                    type: 'DELETE',
+                    dataType: 'json',
+                    success: function(response) {
+                        if(response.status) {
+                            alert(response.message);
+                            loadWorkerHistory(worker_id); // This will refresh and hide the deleted record
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Error deleting record: ' + error);
+                    }
+                });
+            }
         }
 
+
+
     </script>
+
+
 </body>
