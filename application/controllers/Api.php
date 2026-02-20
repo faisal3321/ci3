@@ -401,5 +401,34 @@ class Api extends RestController {
 			], 400);
 		}
 	}
+
+
+	// Edit worker hisory
+	public function editWorkerHistory_post($id = null, $start = null, $end = null)
+	{
+
+		if (!$id || !$start || !$end) {
+			$this->set_response([
+				'status'		=> FALSE,
+				'message'		=> 'Missing required parameters: id, work_start_date, work_end_date'
+			], 400);
+			return;
+		}
+
+		$res = $this->api->editWorkerHistory($id, $start, $end);
+
+		if($res) {
+			$this->set_response([
+				'status'		=> TRUE,
+				'message'		=> 'worker history updated successfully',
+				'data'			=> $res
+			], 200);
+		} else {
+			$this->set_response([
+				'status'		=> FALSE,
+				'message'		=> 'updation failed ! Something went wrong'
+			], 400);
+		}
+	}
 	
 }

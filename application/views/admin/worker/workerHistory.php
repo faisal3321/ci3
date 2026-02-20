@@ -44,8 +44,9 @@
     <!-- modal for date popup when add worker history -->
     <div id="historyModal" class="modal">
         <div class="modal-content">
-            <h1>Add New Worker History</h1>
+            <h3 id="modalTitle">Add New Worker History</h3>
             <form id="addHistoryForm">
+                <input type="hidden" id="edit_record_worker_history" value=""/>
                 <div class="form-group">
                     <label> Work Start Date (Required)</label>
                     <input type="date" id="work_start_date" required/>
@@ -56,7 +57,7 @@
                 </div>
                 <div style="text-align: right;">
                     <button type="button" onclick="closeModal()" style="padding: 10px; margin-right: 5px;">Cancel</button>
-                    <button type="submit" class="btn-add">Save History</button>
+                    <button type="submit" class="btn-add" id="submitBtn">Save History</button>
                 </div>
             </form>
         </div>
@@ -82,7 +83,9 @@
     </table>
 
 
+
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
 
 
     <script>
@@ -99,10 +102,18 @@
             // form submit event
             $('#addHistoryForm').on('submit', function(e) {
                 e.preventDefault();
-                saveWorkerHistory();
-            })
 
+                let history_id = $('#edit_record_worker_history').val();
+
+                if(history_id) {
+                    updateWorkerHistory();
+                } else {
+                    saveWorkerHistory();
+                }
+            });
         });
+
+
 
         function loadWorkerHistory(worker_id) {
             $.ajax({
@@ -177,16 +188,62 @@
         }
 
         // Modal Controls
-        function openModal() { $('#historyModal').fadeIn(); }
         function closeModal() { $('#historyModal').fadeOut(); }
         
+        function openModal() {
+            $('#modalTitle').text('Add New Worker History');
+            $('#submitBtn').text('Save History');
 
-
-        // Edit worker history table 
-        function editWorkerHistory(id) {
-            alert('Edit record ID: ' + id);
+            $('#edit_record_worker_history').val('');  // refresh the ID
+            $('#addHistoryForm')[0].reset();
+            $('#historyModal').fadeIn();
         }
 
+        // Edit worker history table - FIXED
+        function editWorkerHistory(id) {
+            $('#modalTitle').text('Edit Worker History');
+            $('#submitBtn').text('Update History');
+            $('#edit_record_worker_history').val(id); // set the id in hidden input
+
+            // find dates from row 
+            let row = $('#row-' + id);
+            let startDate = row.find('td:eq(3)').text().trim();
+            let endDate = row.find('td:eq(4)').text().trim();
+            
+
+            // Extract only the date part (YYYY-MM-DD) if it's a datetime string
+            if (startDate && startDate.includes(' ')) {
+                startDate = startDate.split(' ')[0]; // Gets only the date part
+            }
+            if (endDate && endDate.includes(' ') && endDate !== '---') {
+                endDate = endDate.split(' ')[0]; // Gets only the date part
+            }
+
+            $('#work_start_date').val(startDate);
+            $('#work_end_date').val(endDate === '---' ? '' : endDate);
+            
+            $('#historyModal').fadeIn(); // Open the modal
+        }
+
+        // Update worker history - 
+        function updateWorkerHistory() {
+            let history_id = $('#edit_record_worker_history').val();
+            let start_date = $('#work_start_date').val();
+            let end_date = $('#work_end_date').val();
+
+            $.ajax({
+                url: '<?php echo base_url("api/editWorkerHistory/"); ?>' + history_id + '/' + start_date + '/' + end_date,
+                type: "POST",
+                dataType: 'json',
+                success: function(response) {
+                    if(response.status) {
+                        alert(response.message);
+                        closeModal();
+                        loadWorkerHistory(worker_id);
+                    }
+                }
+            });
+        }
 
 
         function deleteWorkerHistory(id) {

@@ -248,6 +248,17 @@ class Api_model extends CI_Model {
 		return $query->result();
 	}
 
+
+
+
+
+
+
+
+
+
+
+
 	// ========================    Worker History    ===========================
 
 
@@ -307,6 +318,20 @@ class Api_model extends CI_Model {
 
 		$insertData['id'] = $this->db->insert_id();
 		return $insertData;
+	}
+
+
+
+	// edit worker history
+	public function editWorkerHistory($id, $work_start_date, $work_end_date)
+	{
+		$data = [
+			'work_start_date'	=> $work_start_date,
+			'work_end_date'		=> $work_end_date,
+			'updatedAt'       => date('Y-m-d H:i:s')
+		];
+
+		return $this->db->where('id', $id)->update('worker_history', $data);
 	}
 
     
