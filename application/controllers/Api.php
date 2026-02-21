@@ -444,6 +444,40 @@ class Api extends RestController {
 	}
 
 
+
+	// check open record for the last row
+	public function checkOpenHistory_post()
+	{
+		ob_start();
+		$worker_id = $this->post('worker_id') ? $this->post('worker_id') : $this->uri->segment(3);
+
+		if(!$worker_id) {
+			$this->set_response([
+				'status'		 => FALSE,
+				'message'		 => 'Worker Id is required'
+			], 400);
+			return;
+		}
+		
+
+		// check last record
+		$res = $this->api->getLastWorkerHistory($worker_id);
+
+		if($res && $res['work_end_date'] === '0000-00-00 00:00:00') {
+			$this->set_response([
+				'status'		=> TRUE,
+				'open'			=> TRUE,
+				'message'		=> 'Please close the previous worker history!'
+			], 200);
+		} else {
+			$this->set_response([
+				'status'		=> FALSE,
+				'open'			=> FALSE
+			], 200);
+		}
+	}
+
+
 	// soft delete worker history
 	public function deleteWorkerHistory_delete($id = null)
 	{

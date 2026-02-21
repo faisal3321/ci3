@@ -130,8 +130,21 @@
                         
                         // Ensure we are dealing with an array
                         let items = Array.isArray(data) ? data : [data];
-
+                        
                         items.forEach(function(item) {
+                            
+                            let actions = '';
+
+                            // If work_end_date is still open
+                            if(item.work_end_date === "0000-00-00 00:00:00") {
+                                actions = `
+                                    <button onclick="editWorkerHistory(${item.id})">Edit</button>
+                                    <button onclick="deleteWorkerHistory(${item.id})">Delete</button>
+                                `;
+                            } else {
+                                actions = `<span style="color:gray;font-weight:bold;">Closed</span>`;
+                            }
+
                             html += `
                                 <tr id="row-${item.id}">
                                     <td>${item.id || '---'}</td>
@@ -139,10 +152,7 @@
                                     <td>${item.name || '---'}</td>
                                     <td>${item.work_start_date || '---'}</td>
                                     <td>${item.work_end_date || '---'}</td>
-                                    <td>
-                                        <button onclick="editWorkerHistory(${item.id})">Edit</button>
-                                        <button onclick="deleteWorkerHistory(${item.id})">Delete</button>
-                                    </td>
+                                    <td>${actions}</td>
                                 </tr>
                             `;
                         });
@@ -197,14 +207,34 @@
         }
         
 
-        
-        function openModal() {
-            $('#modalTitle').text('Add New Worker History');
-            $('#submitBtn').text('Save History');
 
-            $('#edit_record_worker_history').val('');  // refresh the ID
-            $('#addHistoryForm')[0].reset();
-            $('#historyModal').fadeIn();
+        function openModal() {
+
+            $.ajax({
+                url: '<?php echo base_url("api/checkOpenHistory"); ?>',
+                type: 'POST',
+                data: { worker_id: worker_id },
+                dataType: 'json',
+                success: function(response) {
+
+                    if(response.open) {
+                        alert("Please close previous worker history first!");
+                        return;
+                    }
+
+                    $('#modalTitle').text('Add New Worker History');
+                    $('#submitBtn').text('Save History');
+
+                    // to edit the worker history
+                    $('#edit_record_worker_history').val(''); 
+                    $('#addHistoryForm')[0].reset();
+                    $('#historyModal').fadeIn();
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error checking history:", error);
+                    alert("Error checking worker history. Please try again.");
+                }
+            });
         }
 
 

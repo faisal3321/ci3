@@ -290,7 +290,7 @@ class Api_model extends CI_Model {
 		return $exist;
 	}
 
-	
+
 	// Adding Worker History Table
 	public function addWorkerHistory($worker_id) {
 
@@ -335,6 +335,19 @@ class Api_model extends CI_Model {
 		];
 
 		return $this->db->where('id', $id)->update('worker_history', $data);
+	}
+
+
+	// get last worker history row
+	public function getLastWorkerHistory($worker_id)
+	{
+		return $this->db
+			->where('worker_id', $worker_id)
+			->where('isDeleted', '0')
+			->order_by('id', 'DESC')
+			->limit(1)
+			->get('worker_history')
+			->row_array();
 	}
 
 
