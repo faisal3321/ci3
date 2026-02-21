@@ -218,7 +218,10 @@
                 success: function(response) {
 
                     if(response.open) {
-                        alert("Please close previous worker history first!");
+                        if(confirm("There's an open work history. Would you like to close it now?")) {
+                            // Auto-fill and open edit modal for the open record
+                            editWorkerHistory(response.data.id);
+                        }
                         return;
                     }
 

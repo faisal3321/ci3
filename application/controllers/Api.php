@@ -384,16 +384,50 @@ class Api extends RestController {
 	}
 
 
+
 	// Add worker History into table 
 	public function addWorkerHistory_post()
 	{
 		$worker_id = $this->post('worker_id')? $this->post('worker_id') : $this->uri->segment(3);
+
+		$start = $this->post('work_start_date');
+    	$end = $this->post('work_end_date');
 		
 		// Check if worker_id is provided
 		if(!$worker_id) {
 			$this->set_response([
 				'status' => FALSE,
 				'message' => 'Worker ID is required' . $worker_id
+			], 400);
+			return;
+		}
+
+		// Check if start date is provided
+		if(empty($start)) {
+			$this->set_response([
+				'status' => FALSE,
+				'message' => 'Work start date is required'
+			], 400);
+			return;
+		}
+
+		// validation
+		if(!empty($end)) {
+			if ($start > $end) {
+				$this->set_response([
+					'status'		=> FALSE,
+					'message'		=> 'End date should not be before Start date'
+				], 400);
+				return;
+			}
+		}
+
+		// check for date overlapping with existing records
+		$hasOverlapp = $this->api->checkDateOverlap($worker_id, $start, $end);
+		if($hasOverlapp) {
+			$this->set_response([
+				'status'		=> FALSE,
+				'message'		=> 'Dates overlapped from existing dates. Please change the dates'
 			], 400);
 			return;
 		}
@@ -415,14 +449,48 @@ class Api extends RestController {
 	}
 
 
+
 	// Edit worker hisory
 	public function editWorkerHistory_post($id = null, $start = null, $end = null)
 	{
+		$id = $id ? $id : $this->post('id');
+		$start = $start ? $start : $this->post('work_start_date');
+		$end = $end ? $end : $this->post('work_end_date');
 
 		if (!$id || !$start || !$end) {
 			$this->set_response([
 				'status'		=> FALSE,
 				'message'		=> 'Missing required parameters: id, work_start_date, work_end_date'
+			], 400);
+			return;
+		}
+
+		// validation
+		if ($start >= $end) {
+			$this->set_response([
+				'status'		=> FALSE,
+				'message'		=> 'End date should not be before Start date'
+			], 400);
+			return;
+		}
+
+		$check_end = !empty($end) ? $end : '0000-00-00 00:00:00';
+
+		// Get worker_id for this record using model method
+		$worker_id = $this->api->getWorkerIdFromHistory($id);
+		if(!$worker_id) {
+			$this->set_response([
+				'status'		=> FALSE,
+				'message'		=> 'Record not found'
+			], 404);
+			return;
+		}
+
+		$hasOverlapp = $this->api->checkDateOverlap($worker_id, $start, $end, $id);
+		if($hasOverlapp) {
+			$this->set_response([
+				'status'		=> FALSE,
+				'message'		=> 'Dates overlapped from existing dates. Please change the dates'
 			], 400);
 			return;
 		}
@@ -448,34 +516,33 @@ class Api extends RestController {
 	// check open record for the last row
 	public function checkOpenHistory_post()
 	{
-		ob_start();
 		$worker_id = $this->post('worker_id') ? $this->post('worker_id') : $this->uri->segment(3);
-
+		
 		if(!$worker_id) {
 			$this->set_response([
-				'status'		 => FALSE,
-				'message'		 => 'Worker Id is required'
+				'status' => FALSE,
+				'message' => 'Worker ID is required'
 			], 400);
 			return;
 		}
-		
 
-		// check last record
-		$res = $this->api->getLastWorkerHistory($worker_id);
+		$last = $this->api->getLastWorkerHistory($worker_id);
 
-		if($res && $res['work_end_date'] === '0000-00-00 00:00:00') {
+		if($last && $last['work_end_date'] == '0000-00-00 00:00:00') {
 			$this->set_response([
-				'status'		=> TRUE,
-				'open'			=> TRUE,
-				'message'		=> 'Please close the previous worker history!'
+				'status' => TRUE,
+				'open' => TRUE,
+				'message' => 'Please close previous work history first!',
+				'data' => $last
 			], 200);
 		} else {
 			$this->set_response([
-				'status'		=> FALSE,
-				'open'			=> FALSE
+				'status' => TRUE,
+				'open' => FALSE
 			], 200);
 		}
 	}
+
 
 
 	// soft delete worker history

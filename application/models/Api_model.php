@@ -259,6 +259,15 @@ class Api_model extends CI_Model {
 
 
 
+
+
+
+	
+
+
+
+
+
 	// ========================    Worker History    ===========================
 
 
@@ -348,6 +357,52 @@ class Api_model extends CI_Model {
 			->limit(1)
 			->get('worker_history')
 			->row_array();
+	}
+
+
+	// Get worker_id from history record
+	public function getWorkerIdFromHistory($id)
+	{
+		$record = $this->db->select('worker_id')
+						->where('id', $id)
+						->get('worker_history')
+						->row();
+		
+		return ($record) ? $record->worker_id : null;
+	}
+
+
+	// check for overlap date
+	public function checkDateOverlap($worker_id, $new_start, $new_end, $exclude_id = null)
+	{
+		$this->db->where('worker_id', $worker_id);
+		$this->db->where('isDeleted', '0');
+
+		// exclude current record when editing
+		if($exclude_id) {
+			$this->db->where('id != ', $exclude_id );
+		}
+
+		$existing = $this->db->get('worker_history')->result_array();
+
+		// very far date of future
+		$new_end = (empty($new_end) || $new_end == '0000-00-00 00:00:00') ? '9999-12-31' : $new_end;
+
+		// loop through all records that are present in table of single worker
+		foreach($existing as $record) {
+
+			$existing_start = $record['work_start_date'];
+			$existing_end = $record['work_end_date'];
+
+			if ($existing_end == '0000-00-00 00:00:00' || empty($existing_end)) {
+				$existing_end = '9999-12-31';
+			}
+
+			 if($new_start <= $existing_end && $new_end >= $existing_start) {
+				return true; // Overlap found
+			}
+		}
+		return false;
 	}
 
 
