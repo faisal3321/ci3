@@ -189,10 +189,14 @@
             })
         }
 
+
+
         // Modal Controls
         function closeModal() { 
             $('#historyModal').fadeOut(); 
         }
+        
+
         
         function openModal() {
             $('#modalTitle').text('Add New Worker History');
@@ -202,6 +206,8 @@
             $('#addHistoryForm')[0].reset();
             $('#historyModal').fadeIn();
         }
+
+
 
         // Edit worker history table 
         function editWorkerHistory(id) {
@@ -213,7 +219,6 @@
             let row = $('#row-' + id);
             let startDate = row.find('td:eq(3)').text().trim();
             let endDate = row.find('td:eq(4)').text().trim();
-
 
             // Extract only the date part (YYYY-MM-DD) if it's a datetime string
             if (startDate && startDate.includes(' ')) {
@@ -228,6 +233,8 @@
             
             $('#historyModal').fadeIn(); // Open the modal
         }
+
+
 
         // Update worker history - 
         function updateWorkerHistory() {
@@ -248,6 +255,7 @@
                 }
             });
         }
+
 
 
         function deleteWorkerHistory(id) {
