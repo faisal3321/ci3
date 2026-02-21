@@ -284,8 +284,12 @@
                         alert(response.message);
                         closeModal();
                         loadWorkerHistory(worker_id);
+                    } else {
+                        // Show error message from server 
+                        alert(response.message);
                     }
-                }
+                },
+                
             });
         }
 
