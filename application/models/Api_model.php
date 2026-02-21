@@ -272,12 +272,13 @@ class Api_model extends CI_Model {
 		$this->db->select('
 		wh.id,
 		wh.worker_id,
+		w.name as name,
 		wh.work_start_date,
 		wh.work_end_date,
 		wh.isDeleted,
 		wh.createdAt,
 		wh.updatedAt, 
-		w.name as name');
+		');
 		$this->db->from('worker_history as wh');
 		$this->db->join('workers as w', 'w.id = wh.worker_id', 'inner');
 		$this->db->where('wh.worker_id', $worker_id);
@@ -289,6 +290,7 @@ class Api_model extends CI_Model {
 		return $exist;
 	}
 
+	
 	// Adding Worker History Table
 	public function addWorkerHistory($worker_id) {
 
