@@ -13,19 +13,19 @@
 
         .btn-add { 
             padding: 10px 20px; 
-            background: #28a745; 
+            background: #2f9c48; 
             color: white; 
             text-decoration: none; 
             border-radius: 4px; 
             font-weight: bold;
         }
-        .btn-add:hover { background: #218838; }
+        .btn-add:hover { background: #0a691a; cursor: pointer; }
 
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 12px 8px; text-align: left; border: 1px solid #ddd; }
         th { background: #f2f2f2; }
 
-        /* Simple Modal Styling */
+        /* Simple Modal Styling or popup thing */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
         .modal-content { background: white; margin: 10% auto; padding: 20px; width: 350px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
         .form-group { margin-bottom: 15px; }
@@ -36,10 +36,12 @@
 
 <body>
 
+
     <div class="header-container">
         <h1>Worker History Page</h1>
         <a class="btn-add" onclick="openModal()">+ Add Worker History</a>
     </div>
+
 
     <!-- modal for date popup when add worker history -->
     <div id="historyModal" class="modal">
@@ -158,7 +160,7 @@
         
 
 
-        // add new record wor worker history table 
+        // add new record in worker history table 
         // suppose worker has work from 2 feb - 8 feb , then this will be saved in one row and let say worker has work again from 11 feb - 18 feb, then this will be saved in another row and it will continue lika this
         function saveWorkerHistory() {
             let start = $('#work_start_date').val();
@@ -178,7 +180,7 @@
                 if(response.status) {
                     alert(response.message);
                     closeModal();
-                    $('#addHistoryForm')[0].reset(); // clear from
+                    $('#addHistoryForm')[0].reset(); // clear form
                     loadWorkerHistory(worker_id); // refresh table
                 } else {
                     alert('Error : ' +  response.message);
@@ -188,7 +190,9 @@
         }
 
         // Modal Controls
-        function closeModal() { $('#historyModal').fadeOut(); }
+        function closeModal() { 
+            $('#historyModal').fadeOut(); 
+        }
         
         function openModal() {
             $('#modalTitle').text('Add New Worker History');
@@ -199,7 +203,7 @@
             $('#historyModal').fadeIn();
         }
 
-        // Edit worker history table - FIXED
+        // Edit worker history table 
         function editWorkerHistory(id) {
             $('#modalTitle').text('Edit Worker History');
             $('#submitBtn').text('Update History');

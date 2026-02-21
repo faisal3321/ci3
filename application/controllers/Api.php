@@ -167,6 +167,7 @@ class Api extends RestController {
 
 		// Check if worker exists
 		$worker = $this->api->singleWorkerData($id);
+		
 		if (!$worker) {
 			$this->set_response([
 				'status' => FALSE,
@@ -443,7 +444,7 @@ class Api extends RestController {
 	}
 
 
-	// delete worker history
+	// soft delete worker history
 	public function deleteWorkerHistory_delete($id = null)
 	{
 		if( $id == null) {
