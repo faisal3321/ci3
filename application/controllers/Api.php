@@ -512,7 +512,7 @@ class Api extends RestController {
 
 
 	// check open record for the last row
-	public function checkOpenHistory_post()
+	public function checkOpenWorkerHistory_post()
 	{
 		$worker_id = $this->post('worker_id') ? $this->post('worker_id') : $this->uri->segment(3);
 		

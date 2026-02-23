@@ -185,17 +185,16 @@
                     work_end_date: end
                 },
                 dataType: 'json',
-
-            success: function(response) {
-                if(response.status) {
-                    alert(response.message);
-                    closeModal();
-                    $('#addHistoryForm')[0].reset(); // clear form
-                    loadWorkerHistory(worker_id); // refresh table
-                } else {
-                    alert('Error : ' +  response.message);
+                success: function(response) {
+                    if(response.status) {
+                        alert(response.message);
+                        closeModal();
+                        $('#addHistoryForm')[0].reset(); // clear form
+                        loadWorkerHistory(worker_id); // refresh table
+                    } else {
+                        alert('Error : ' +  response.message);
+                    }
                 }
-            }
             })
         }
 
@@ -211,7 +210,7 @@
         function openModal() {
 
             $.ajax({
-                url: '<?php echo base_url("api/checkOpenHistory"); ?>',
+                url: '<?php echo base_url("api/checkOpenWorkerHistory"); ?>',
                 type: 'POST',
                 data: { worker_id: worker_id },
                 dataType: 'json',
