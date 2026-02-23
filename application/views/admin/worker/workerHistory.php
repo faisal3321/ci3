@@ -39,6 +39,7 @@
 
     <div class="header-container">
         <h1>Worker History Page</h1>
+        <!-- <button class="btn-add"><a href="<?php echo base_url('worker/manage/'); ?>${data}" target="_blank">📋 Attendance Log</a></button> -->
         <a class="btn-add" onclick="openModal()">+ Add Worker History</a>
     </div>
 

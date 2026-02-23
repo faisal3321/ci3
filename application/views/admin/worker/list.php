@@ -83,8 +83,8 @@
                     data: 'id',
                     render: function(data) {
                         return `
-                            <a href="<?php echo base_url('worker/manage/'); ?>${data}" target="_blank">📋 Manage</a><br>
-                            <a href="<?php echo base_url('worker/workerHistory/'); ?>${data}" target="_blank">📋 WH</a><br>
+                            <a href="<?php echo base_url('worker/manage/'); ?>${data}" target="_blank">📋 Attendance Log</a><br>
+                            <a href="<?php echo base_url('worker/workerHistory/'); ?>${data}" target="_blank">📋 Worker History</a><br>
                             <a href="<?php echo base_url('worker/add/'); ?>${data}">✏️ Edit</a><br>
                             <a href="javascript:void(0);" onclick="deleteWorker(${data})" >🗑️ Delete</a>
                         `;
