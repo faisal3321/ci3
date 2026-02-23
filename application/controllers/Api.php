@@ -411,7 +411,7 @@ class Api extends RestController {
 			return;
 		}
 
-		// validation
+		// validation end date should not be before start date 
 		if(!empty($end)) {
 			if ($start > $end) {
 				$this->set_response([
@@ -460,21 +460,19 @@ class Api extends RestController {
 		if (!$id || !$start || !$end) {
 			$this->set_response([
 				'status'		=> FALSE,
-				'message'		=> 'Missing required parameters: id, work_start_date, work_end_date'
+				'message'		=> 'Missing: id, work_start_date, work_end_date'
 			], 400);
 			return;
 		}
 
 		// validation
-		if ($start >= $end) {
+		if ($start > $end) {
 			$this->set_response([
 				'status'		=> FALSE,
 				'message'		=> 'End date should not be before Start date'
 			], 400);
 			return;
 		}
-
-		$check_end = !empty($end) ? $end : '0000-00-00 00:00:00';
 
 		// Get worker_id for this record using model method
 		$worker_id = $this->api->getWorkerIdFromHistory($id);
@@ -526,7 +524,7 @@ class Api extends RestController {
 			return;
 		}
 
-		$last = $this->api->getLastWorkerHistory($worker_id);
+		$last = $this->api->getWorkerLastHistory($worker_id);
 
 		if($last && $last['work_end_date'] == '0000-00-00 00:00:00') {
 			$this->set_response([

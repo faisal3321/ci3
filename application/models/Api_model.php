@@ -348,7 +348,7 @@ class Api_model extends CI_Model {
 
 
 	// get last worker history row
-	public function getLastWorkerHistory($worker_id)
+	public function getWorkerLastHistory($worker_id)
 	{
 		return $this->db
 			->where('worker_id', $worker_id)
