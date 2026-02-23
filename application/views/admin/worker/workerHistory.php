@@ -133,17 +133,10 @@
                         
                         items.forEach(function(item) {
                             
-                            let actions = '';
-
-                            // If work_end_date is still open
-                            if(item.work_end_date === "0000-00-00 00:00:00") {
-                                actions = `
-                                    <button onclick="editWorkerHistory(${item.id})">Edit</button>
-                                    <button onclick="deleteWorkerHistory(${item.id})">Delete</button>
-                                `;
-                            } else {
-                                actions = `<span style="color:gray;font-weight:bold;">Closed</span>`;
-                            }
+                            let actions = `
+                                <button onclick="editWorkerHistory(${item.id})">Edit</button>
+                                <button onclick="deleteWorkerHistory(${item.id})">Delete</button>
+                            `;
 
                             html += `
                                 <tr id="row-${item.id}">
@@ -261,7 +254,7 @@
             }
 
             $('#work_start_date').val(startDate);
-            $('#work_end_date').val(endDate === '---' ? '' : endDate);
+            $('#work_end_date').val((endDate === '---' || endDate === '0000-00-00 00:00:00') ? '' : endDate);
             
             $('#historyModal').fadeIn(); // Open the modal
         }
@@ -319,5 +312,10 @@
 
     </script>
 
+    
+
 
 </body>
+
+
+

@@ -457,54 +457,60 @@ class Api extends RestController {
 		$start = $start ? $start : $this->post('work_start_date');
 		$end = $end ? $end : $this->post('work_end_date');
 
-		if (!$id || !$start || !$end) {
+		// Validate required fields (end date is optional)
+		if (!$id || !$start) {
 			$this->set_response([
-				'status'		=> FALSE,
-				'message'		=> 'Missing: id, work_start_date, work_end_date'
+				'status'  => FALSE,
+				'message' => 'Missing: id, work_start_date'
 			], 400);
 			return;
 		}
 
-		// validation
-		if ($start > $end) {
+		// If end date is empty, treat as open (default value)
+		if (empty($end)) {
+			$end = '0000-00-00 00:00:00';
+		}
+
+		// Only validate start > end if end is a real date (not the default)
+		if ($end != '0000-00-00 00:00:00' && $start > $end) {
 			$this->set_response([
-				'status'		=> FALSE,
-				'message'		=> 'End date should not be before Start date'
+				'status'  => FALSE,
+				'message' => 'End date should not be before Start date'
 			], 400);
 			return;
 		}
 
 		// Get worker_id for this record using model method
 		$worker_id = $this->api->getWorkerIdFromHistory($id);
-		if(!$worker_id) {
+		if (!$worker_id) {
 			$this->set_response([
-				'status'		=> FALSE,
-				'message'		=> 'Record not found'
+				'status'  => FALSE,
+				'message' => 'Record not found'
 			], 404);
 			return;
 		}
 
 		$hasOverlapp = $this->api->checkDateOverlap($worker_id, $start, $end, $id);
-		if($hasOverlapp) {
+		if ($hasOverlapp) {
 			$this->set_response([
-				'status'		=> FALSE,
-				'message'		=> 'Dates overlapped from existing dates. Please change the dates'
+				'status'  => FALSE,
+				'message' => 'Dates overlapped from existing dates. Please change the dates'
 			], 400);
 			return;
 		}
 
 		$res = $this->api->editWorkerHistory($id, $start, $end);
 
-		if($res) {
+		if ($res) {
 			$this->set_response([
-				'status'		=> TRUE,
-				'message'		=> 'worker history updated successfully',
-				'data'			=> $res
+				'status'  => TRUE,
+				'message' => 'worker history updated successfully',
+				'data'    => $res
 			], 200);
 		} else {
 			$this->set_response([
-				'status'		=> FALSE,
-				'message'		=> 'updation failed ! Something went wrong'
+				'status'  => FALSE,
+				'message' => 'updation failed ! Something went wrong'
 			], 400);
 		}
 	}

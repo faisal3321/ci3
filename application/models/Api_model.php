@@ -104,82 +104,102 @@ class Api_model extends CI_Model {
 
 
 
-	public function manageWorkerAttendance($workerId, $startDate = NULL, $endDate = NULL)
-	{
-		// to make sure today's date is present in the calendar
-		$this->generateCalendar();
+public function manageWorkerAttendance($workerId, $startDate = NULL, $endDate = NULL)
+{
+    // to make sure today's date is present in the calendar
+    $this->generateCalendar();
 
-		// get worker information to know when the joining date
-		$worker = $this->db->select('name, created_at')->get_where('workers', ['id' => $workerId])->row();
+    // get worker information to know when the joining date
+    $worker = $this->db->select('name, created_at')->get_where('workers', ['id' => $workerId])->row();
 
-		if (!$worker) {
-			return [];
-		}
+    if (!$worker) {
+        return [];
+    }
 
-		$workerName  = $worker->name;
-		$joiningDate = date('Y-m-d', strtotime($worker->created_at));
-		$today = date('Y-m-d');
+    $workerName  = $worker->name;
+    $joiningDate = date('Y-m-d', strtotime($worker->created_at));
+    $today = date('Y-m-d');
 
-		// auto-sync
-		$this->db->select('id, calendar_date, is_weekend');
-		$this->db->from('calendar');
-		$this->db->where('calendar_date >=', $joiningDate);
-		$this->db->where('calendar_date <=', $today);
-		$allDates = $this->db->get()->result();
+    // AUTO-SYNC: Only get dates where a "worker_history" record exists, this prevents creating attendance for gaps (like Feb 9-11 in your example)
+    $this->db->select('c.id, c.calendar_date, c.is_weekend');
+    $this->db->from('calendar c');
 
-		foreach ($allDates as $date) {
-			$check = $this->db->get_where('attendance', [
-				'worker_id' => $workerId, 
-				'attendance_date' => $date->id
-			])->num_rows();
+    // Join calendar with worker_history based on the date falling within start-end range
+    $this->db->join('worker_history wh', "c.calendar_date >= wh.work_start_date 
+        AND (wh.work_end_date = '0000-00-00 00:00:00' OR wh.work_end_date >= c.calendar_date)", 'inner');
 
-			if ($check == 0) {
-				
-				$defaultWorker = ($date->is_weekend == 1) ? 4 : 1; // Holiday if weekend, else Present
-				$defaultCust   = ($date->is_weekend == 1) ? 4 : 0; // Holiday if weekend, else N/A
+    $this->db->where('wh.worker_id', $workerId);
+    $this->db->where('wh.isDeleted', '0');
+    $this->db->where('c.calendar_date >=', $joiningDate);
+    $this->db->where('c.calendar_date <=', $today);
 
-				$this->db->insert('attendance', [
-					'worker_id' => $workerId,
-					'attendance_date' => $date->id,
-					'worker_attendance' => $defaultWorker,
-					'customer_side_attendance' => $defaultCust,
-					'created_at' => date('Y-m-d H:i:s'),
-					'updated_at' => date('Y-m-d H:i:s')
-				]);
-			}
-		}
+    // Group by ID so if a worker has two history records for one day, it doesn't create duplicate attendance rows.
+    $this->db->group_by('c.id'); 
 
-		// fetch the data
-		$this->db->select('
-			a.id,
-			a.worker_id,
-			w.name,
-			c.id as calendar_id,
-			c.calendar_date as attendance_date,
-			c.is_weekend,
-			a.worker_attendance,
-			a.customer_side_attendance
-		', FALSE);
+    $allDates = $this->db->get()->result();
 
-		$this->db->from('calendar c');
-		$this->db->join('attendance a', 'a.attendance_date = c.id', 'inner');
-		$this->db->join('workers w', 'w.id = a.worker_id', 'inner');
+    foreach ($allDates as $date) {
+        $check = $this->db->get_where('attendance', [
+            'worker_id' => $workerId, 
+            'attendance_date' => $date->id
+        ])->num_rows();
 
-		$this->db->where('a.worker_id', $workerId);
-		$this->db->where('c.calendar_date >= ', $joiningDate);
-		$this->db->where('c.calendar_date <= ', $today);
+        if ($check == 0) {
+            
+            $defaultWorker = ($date->is_weekend == 1) ? 4 : 1; // Holiday if weekend, else Present
+            $defaultCust   = ($date->is_weekend == 1) ? 4 : 0; // Holiday if weekend, else N/A
 
-		if($startDate) {
-			$this->db->where('c.calendar_date >= ', $startDate);
-		}
-		if($endDate) {
-			$this->db->where('c.calendar_date <= ', $endDate);
-		}   
+            $this->db->insert('attendance', [
+                'worker_id' => $workerId,
+                'attendance_date' => $date->id,
+                'worker_attendance' => $defaultWorker,
+                'customer_side_attendance' => $defaultCust,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+        }
+    }
 
-		$this->db->order_by('c.calendar_date', 'DESC');
-		return $this->db->get()->result_array();
+    // fetch the data – now filtered by worker_history periods
+    $this->db->select('
+        a.id,
+        a.worker_id,
+        w.name,
+        c.id as calendar_id,
+        c.calendar_date as attendance_date,
+        c.is_weekend,
+        a.worker_attendance,
+        a.customer_side_attendance
+    ', FALSE);
 
-	}
+    $this->db->from('calendar c');
+    $this->db->join('attendance a', 'a.attendance_date = c.id', 'inner');
+    $this->db->join('workers w', 'w.id = a.worker_id', 'inner');
+
+    $this->db->where('a.worker_id', $workerId);
+    $this->db->where('c.calendar_date >= ', $joiningDate);
+    $this->db->where('c.calendar_date <= ', $today);
+
+    // only include dates that belong to an active work period ---
+    $this->db->where("EXISTS (
+        SELECT 1 
+        FROM worker_history wh
+        WHERE wh.worker_id = a.worker_id
+          AND wh.isDeleted = '0'
+          AND c.calendar_date >= wh.work_start_date
+          AND (wh.work_end_date = '0000-00-00 00:00:00' OR wh.work_end_date >= c.calendar_date)
+    )", NULL, FALSE);
+
+    if($startDate) {
+        $this->db->where('c.calendar_date >= ', $startDate);
+    }
+    if($endDate) {
+        $this->db->where('c.calendar_date <= ', $endDate);
+    }   
+
+    $this->db->order_by('c.calendar_date', 'DESC');
+    return $this->db->get()->result_array();
+}
 
 
 
