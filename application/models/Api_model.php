@@ -334,6 +334,15 @@ public function manageWorkerAttendance($workerId, $startDate = NULL, $endDate = 
 		$work_start_date = $this->input->post('work_start_date');
 		$work_end_date = $this->input->post('work_end_date');
 
+		// validation for worker history entry the start or end date cannot be in fututre
+		$today = date('Y-m-d');
+		if ($work_start_date > $today) {
+			return false;   // start date cannot be after today
+		}
+		if (!empty($work_end_date) && $work_end_date > $today) {
+			return false;   // end date (if provided) cannot be after today
+		}
+
 		$now = date('Y-m-d H:i:s');
 		$default_date = "0000-00-00 00:00:00";
 
@@ -357,6 +366,7 @@ public function manageWorkerAttendance($workerId, $startDate = NULL, $endDate = 
 	// edit worker history
 	public function editWorkerHistory($id, $work_start_date, $work_end_date)
 	{
+
 		$data = [
 			'work_start_date'	=> $work_start_date,
 			'work_end_date'		=> $work_end_date,

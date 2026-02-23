@@ -392,6 +392,16 @@ class Api extends RestController {
 
 		$start = $this->post('work_start_date');
     	$end = $this->post('work_end_date');
+
+		// start date cannot be before 2026-01-01 
+		$min_date = '2026-01-01';
+		if ($start < $min_date) {
+			$this->set_response([
+				'status'  => FALSE,
+				'message' => 'Start date cannot be before 2026-01-01, Please fill proper date'
+			], 400);
+			return;
+		}
 		
 		// Check if worker_id is provided
 		if(!$worker_id) {
@@ -434,6 +444,14 @@ class Api extends RestController {
 
 		$res = $this->api->addWorkerHistory($worker_id);
 
+		if ($res === false) {
+			$this->set_response([
+				'status'  		=> FALSE,
+				'message' 		=> 'Work dates cannot be in the future, Please fill proper date '
+			], 400);
+			return;
+		}
+
 		if($res) {
 			$this->set_response([
 				'status'		=> TRUE,
@@ -475,7 +493,34 @@ class Api extends RestController {
 		if ($end != '0000-00-00 00:00:00' && $start > $end) {
 			$this->set_response([
 				'status'  => FALSE,
-				'message' => 'End date should not be before Start date'
+				'message' => 'End date should not be before Start date, Please fill proper date'
+			], 400);
+			return;
+		}
+
+		// start date cannot be before 2026-01-01 
+		$min_date = '2026-01-01';
+		if ($start < $min_date) {
+			$this->set_response([
+				'status'  => FALSE,
+				'message' => 'Start date cannot be before 2026-01-01, Please fill proper date'
+			], 400);
+			return;
+		}
+
+		// validation for worker history entry the start or end date cannot be in fututre
+		$today = date('Y-m-d');
+		if ($start > $today) {
+			$this->set_response([
+				'status'  => FALSE,
+				'message' => 'Start date cannot be in the future, Please fill proper date'
+			], 400);
+			return;
+		}
+		if ($end != '0000-00-00 00:00:00' && $end > $today) {
+			$this->set_response([
+				'status'  => FALSE,
+				'message' => 'End date cannot be in the future, Please fill proper date'
 			], 400);
 			return;
 		}

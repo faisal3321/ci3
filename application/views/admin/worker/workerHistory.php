@@ -168,6 +168,9 @@
         function saveWorkerHistory() {
             let start = $('#work_start_date').val();
             let end = $('#work_end_date').val();
+            let $btn = $('#submitBtn');
+
+            $btn.prop('disabled', true).text('Saving...'); // Prevent double clicks
 
             $.ajax({
                 url: '<?php echo base_url('api/addWorkerHistory'); ?>',
@@ -179,16 +182,28 @@
                 },
                 dataType: 'json',
                 success: function(response) {
+                    $btn.prop('disabled', false).text('Save History');
                     if(response.status) {
                         alert(response.message);
                         closeModal();
-                        $('#addHistoryForm')[0].reset(); // clear form
-                        loadWorkerHistory(worker_id); // refresh table
+                        $('#addHistoryForm')[0].reset();
+                        loadWorkerHistory(worker_id);
                     } else {
-                        alert('Error : ' +  response.message);
+                        alert("Validation Error: " + response.message);
                     }
+                },
+                error: function(xhr) {
+                    $btn.prop('disabled', false).text('Save History');
+                    
+                    let msg = 'Error: ';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        msg += xhr.responseJSON.message;
+                    } else {
+                        msg += 'The server encountered an error processing the dates.';
+                    }
+                    alert(msg);
                 }
-            })
+            });
         }
 
 
@@ -281,7 +296,15 @@
                         alert(response.message);
                     }
                 },
-                
+                error: function(xhr, status, error) {
+                    let msg = 'Update failed. ';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        msg += xhr.responseJSON.message;
+                    } else {
+                        msg += status + ': ' + error;
+                    }
+                    alert(msg);
+                }  
             });
         }
 
@@ -303,6 +326,15 @@
                     },
                     error: function(xhr, status, error) {
                         alert('Error deleting record: ' + error);
+                    },
+                    error: function(xhr, status, error) {
+                        let msg = 'Update failed. ';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg += xhr.responseJSON.message;
+                        } else {
+                            msg += status + ': ' + error;
+                        }
+                        alert(msg);
                     }
                 });
             }
