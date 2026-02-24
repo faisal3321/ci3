@@ -311,7 +311,7 @@ class Api extends RestController {
 		if ($result) {
 			$this->set_response(['status' => TRUE, 'message' => 'Attendance Saved!'], 200);
 		} else {
-			$this->set_response(['status' => FALSE, 'message' => 'Database Error'], 500);
+			$this->set_response(['status' => FALSE, 'message' => 'Something went wrong'], 500);
 		}
 	}
 
