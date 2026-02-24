@@ -341,7 +341,7 @@ class Api_model extends CI_Model {
 
 		$insertData['id'] = $this->db->insert_id();
 
-		$this->syncAttendanceWithHistory($worker_id);
+		$this->syncAttendanceWithWorkerHistory($worker_id);
 		return $insertData;
 	}
 
@@ -363,7 +363,7 @@ class Api_model extends CI_Model {
 		// get worker id to sync
 		$worker_id = $this->getWorkerIdFromHistory($id);
 		if ($worker_id) {
-			$this->syncAttendanceWithHistory($worker_id);
+			$this->syncAttendanceWithWorkerHistory($worker_id);
 		}
 		return true;
 
@@ -450,7 +450,7 @@ class Api_model extends CI_Model {
 			]);
 
 			// automatically mark attendance outside remaining history as isDeleted = 1
-			$this->syncAttendanceWithHistory($worker_id);
+			$this->syncAttendanceWithWorkerHistory($worker_id);
 			return true;
 		}
 		return false;
@@ -460,7 +460,7 @@ class Api_model extends CI_Model {
 
 
 	// 02-24-1016
-	public function syncAttendanceWithHistory($worker_id) {
+	public function syncAttendanceWithWorkerHistory($worker_id) {
 
 		// 1. mark all as delete for this specific worker
 		$this->db->where('worker_id', $worker_id)->update('attendance',
@@ -494,7 +494,7 @@ class Api_model extends CI_Model {
 				]);
 			}
 		}
-		// 3. generate for missing date in the date range
+		// 3. generate for new date that are missing earlier in the date range
 		$this->manageWorkerAttendance($worker_id);
 	}
 
