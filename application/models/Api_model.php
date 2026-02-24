@@ -462,7 +462,7 @@ class Api_model extends CI_Model {
 	// 02-24-1016
 	public function syncAttendanceWithWorkerHistory($worker_id) {
 
-		// 1. mark all as delete for this specific worker
+		// 1. mark as delete for this specific worker
 		$this->db->where('worker_id', $worker_id)->update('attendance',
 		[
 			'isDeleted'		=> '1',
