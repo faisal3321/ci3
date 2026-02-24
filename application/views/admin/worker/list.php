@@ -18,8 +18,10 @@
 
 
 <body>
-
-    <h1>Hello worker list...</h1>
+    
+    <h1 style=" font-size: 3rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+        Welcome To WORKER LIST...
+    </h1>
 
     <div id="table-error"></div>
     
