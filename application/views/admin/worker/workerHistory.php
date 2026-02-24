@@ -74,7 +74,7 @@
             <tr>
                 <th>ID</th>
                 <th>Worker ID</th>
-                <th>Name</th>
+                <th>Worker Name</th>
                 <th>Work Start Date</th>
                 <th>Work End Date</th>
                 <th>Action</th>

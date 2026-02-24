@@ -25,7 +25,7 @@
             <tr>
                 <th>ID</th>
                 <th>Worker ID</th>
-                <th>Name</th>
+                <th>Worker Name</th>
                 <th>Attendance Date</th>
                 <th>Worker Side Attendance</th>
                 <th>Customer Side Attendance</th>
