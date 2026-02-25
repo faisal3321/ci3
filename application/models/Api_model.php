@@ -304,41 +304,46 @@ class Api_model extends CI_Model {
 	// Adding Worker History Table
 	public function addWorkerHistory($worker_id) {
 
-		// fetch worker_id and name from workers table to insert here
-		$this->db->select('name');
+		// Fetch worker info including name and created_at
+		$this->db->select('name, created_at');
 		$this->db->where('id', $worker_id);
 		$worker = $this->db->get('workers')->row();
 
-		$name = ($worker) ? $worker->name : '';
+		if (!$worker) return false;
 
-		// get date input sent from Ajax
+		$name = $worker->name;
+		$worker_created_date = date('Y-m-d', strtotime($worker->created_at));
+
+		// 2. Get date input
 		$work_start_date = $this->input->post('work_start_date');
 		$work_end_date = $this->input->post('work_end_date');
 
-		// validation for worker history entry the start or end date cannot be in fututre
-		$today = date('Y-m-d');
-		if ($work_start_date > $today) {
-			return false;   // start date cannot be after today
+		// We cannot have worker history row, start date before worker was created
+		if ($work_start_date < $worker_created_date) {
+			return ['Error' => 'Worker History cannot be before worker creation date ' . $worker_created_date . ''];
 		}
-		if (!empty($work_end_date) && $work_end_date > $today) {
-			return false;   // end date (if provided) cannot be after today
+
+		// 4. Validation: No future dates
+		$today = date('Y-m-d');
+		if ($work_start_date > $today) return false;
+		if (!empty($work_end_date) && $work_end_date > $today && $work_end_date != '0000-00-00 00:00:00') {
+			return false;
 		}
 
 		$now = date('Y-m-d H:i:s');
 		$default_date = "0000-00-00 00:00:00";
 
 		$insertData = [
-			'worker_id'			=> $worker_id,
-			'name'				=> $name,
-			'work_start_date'	=> $work_start_date,
-			'work_end_date'		=> empty($work_end_date) ? $default_date : $work_end_date,
-			'isDeleted'			=> "0",
-			'createdAt'			=> $now,
-			'updatedAt'			=> $now
+			'worker_id'         => $worker_id,
+			'name'              => $name,
+			'work_start_date'   => $work_start_date,
+			'work_end_date'     => empty($work_end_date) ? $default_date : $work_end_date,
+			'isDeleted'         => "0",
+			'createdAt'         => $now,
+			'updatedAt'         => $now
 		];
 
 		$this->db->insert('worker_history', $insertData);
-
 		$insertData['id'] = $this->db->insert_id();
 
 		$this->syncAttendanceWithWorkerHistory($worker_id);
@@ -415,20 +420,33 @@ class Api_model extends CI_Model {
 		$existing = $this->db->get('worker_history')->result_array();
 
 		// very far date of future
-		$new_end = (empty($new_end) || $new_end == '0000-00-00 00:00:00') ? '9999-12-31' : $new_end;
+		$new_start_dt = strtotime(date('Y-m-d', strtotime($new_start)));
+
+		// Handle open end date
+		if (empty($new_end) || $new_end == '0000-00-00 00:00:00') {
+			$new_end_dt = strtotime('9999-12-31');
+		} else {
+			$new_end_dt = strtotime(date('Y-m-d', strtotime($new_end)));
+		}
 
 		// loop through all records that are present in table of single worker
 		foreach($existing as $record) {
 
-			$existing_start = $record['work_start_date'];
+			$existing_start = strtotime(date('Y-m-d', strtotime($record['work_start_date'])));
 			$existing_end = $record['work_end_date'];
 
-			if ($existing_end == '0000-00-00 00:00:00' || empty($existing_end)) {
-				$existing_end = '9999-12-31';
+			if (empty($record['work_end_date']) || $record['work_end_date'] == '0000-00-00 00:00:00') {
+				$existing_end = strtotime('9999-12-31');
+			} else {
+				$existing_end = strtotime(date('Y-m-d', strtotime($record['work_end_date'])));
 			}
 
-			 if($new_start <= $existing_end && $new_end >= $existing_start) {
-				return true; // Overlap found
+			// if ($existing_end == '0000-00-00 00:00:00' || empty($existing_end)) {
+			// 	$existing_end = '9999-12-31';
+			// }
+
+			if ($new_start_dt <= $existing_end && $new_end_dt >= $existing_start) {
+				return true; // Overlap confirmed
 			}
 		}
 		return false;
@@ -459,7 +477,7 @@ class Api_model extends CI_Model {
 
 
 
-	// 02-24-1016
+	// SYNC Attendance with the worker hoistory table according to specific worker id
 	public function syncAttendanceWithWorkerHistory($worker_id) {
 
 		// 1. mark as delete for this specific worker

@@ -7,10 +7,30 @@
     <!-- DataTables Buttons CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 
+    <!-- bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         body { font-family: sans-serif; padding: 20px; }
         .btn-add { padding: 10px 15px; background: #28a745; color: white; text-decoration: none; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+        
+        /* Extra Small Button Styling */
+        .btn-xs {
+            padding: 2px 6px;
+            font-size: 11px;
+            line-height: 1.2;
+            border-radius: 3px;
+            width: 100%; /* Makes them uniform width */
+            text-align: left; /* Aligns text/emoji to the left */
+        }
+
+        /* Adjust the column width so it's not too wide */
+        #workerTable td:last-child {
+            width: 120px;
+        }
     </style>
 </head>
 
@@ -88,9 +108,17 @@
                         data: 'id',
                         render: function(data) {
                             return `
-                                <a href="<?php echo base_url('worker/workerHistory/'); ?>${data}" target="_blank">📋 Worker History</a><br>
-                                <a href="<?php echo base_url('worker/add/'); ?>${data}">✏️ Edit</a><br>
-                                <a href="javascript:void(0);" onclick="deleteWorker(${data})" >🗑️ Delete</a>
+                                <div class="d-flex flex-column gap-1">
+                                    <a href="<?php echo base_url('worker/workerHistory/'); ?>${data}" target="_blank" class="btn btn-xs btn-info text-white">
+                                        📋 Worker History
+                                    </a>
+                                    <a href="<?php echo base_url('worker/add/'); ?>${data}" class="btn btn-xs btn-primary">
+                                        ✏️ Edit Worker
+                                    </a>
+                                    <a href="javascript:void(0);" onclick="deleteWorker('${data}')" class="btn btn-xs btn-danger">
+                                        🗑️ Delete Worker
+                                    </a>
+                                </div>
                             `;
                         }
                     }

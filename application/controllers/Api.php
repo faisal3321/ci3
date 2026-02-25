@@ -444,6 +444,15 @@ class Api extends RestController {
 
 		$res = $this->api->addWorkerHistory($worker_id);
 
+		// Checking for validation errors from the model if the worker history is created before worker creation date
+		if (is_array($res) && isset($res['Error'])) {
+			$this->set_response([
+				'status'  => FALSE,
+				'message' => $res['Error']
+			], 400);
+			return;
+		}
+
 		if ($res === false) {
 			$this->set_response([
 				'status'  		=> FALSE,
