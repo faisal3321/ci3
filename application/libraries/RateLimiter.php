@@ -5,8 +5,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class RateLimiter 
 {
     protected $CI;
-    protected $maxTokens = 100; // max token in bucket can be 20
-    protected $refillRate = 20; // 5 token per min refiller will refill the bucket
+    protected $maxTokens = 30; // max token in bucket can be 30
+    protected $refillRate = 10; // 10 token per min refiller will refill the bucket
 
 
     public function __construct() 

@@ -466,7 +466,8 @@ class Api extends RestController {
 			$this->set_response([
 				'status'		=> TRUE,
 				'message'		=> 'worker history added successfully',
-				'data'			=> $res
+				'data'			=> $res,
+				'query'			=> $raw_sql
 			], 200);
 		} else {
 			$this->set_response([
@@ -619,11 +620,14 @@ class Api extends RestController {
 		}
 
 		$res = $this->api->deleteWorkerHistory($id);
+
+		$all_queries = $this->db->queries;
 		
 		if($res) {
 			$this->set_response([
 				'status'		=> TRUE,
-				'message'		=> 'Worker history row deleted successfully.'
+				'message'		=> 'Worker history row deleted successfully.',
+				'query'			=> $all_queries
 			], 200);
 		} else {
 			$this->set_response([

@@ -441,10 +441,6 @@ class Api_model extends CI_Model {
 				$existing_end = strtotime(date('Y-m-d', strtotime($record['work_end_date'])));
 			}
 
-			// if ($existing_end == '0000-00-00 00:00:00' || empty($existing_end)) {
-			// 	$existing_end = '9999-12-31';
-			// }
-
 			if ($new_start_dt <= $existing_end && $new_end_dt >= $existing_start) {
 				return true; // Overlap confirmed
 			}
