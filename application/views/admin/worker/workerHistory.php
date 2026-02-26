@@ -128,11 +128,8 @@
                 dataType: 'json',
                 success: function(response) {
                     if(response.status && response.data && response.data.length > 0) {
-                        let data = response.data;
+                        let items = response.data;
                         let html = '';
-                        
-                        // Ensure we are dealing with an array
-                        let items = Array.isArray(data) ? data : [data];
                         
                         items.forEach(function(item) {
                             
