@@ -40,7 +40,7 @@
         $(document).ready(function() {
             const editId = `<?php echo isset($workerId) ? $workerId : '' ; ?>`;
 
-            // 1. Prefill data using AJAX if editing
+            // Prefill data using AJAX if editing
             if (editId) {
                 document.title = 'Edit Worker';
                 $('h1').text('Edit Worker');
@@ -67,7 +67,7 @@
                 });
             }
 
-            // 2. Submit Form using AJAX
+            // Submit Form using AJAX
             $('#addWorkerForm').on('submit', function(e) {
                 e.preventDefault();
 
