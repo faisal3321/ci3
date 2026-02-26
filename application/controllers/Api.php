@@ -377,9 +377,10 @@ class Api extends RestController {
 			], 200);
 		} else {
 			$this->set_response([
-				'status' => FALSE,
-				'message' => 'No records found'
-			], 404);
+				'status' => TRUE,
+				'message' => 'No records found',
+				'data'	=> $res
+			], 200);
 		}
 	}
 
