@@ -269,11 +269,6 @@ class Api_model extends CI_Model {
 
 	// ========================    Worker History    ===========================
 
-
-	// public function workerHistory($worker_id) {
-	// 	$exist = $this->db->get_where('worker_history', ["worker_id" => $worker_id])->result_array();
-	// 	return $exist;
-	// }
     
 	public function workerHistory($worker_id) {
 
