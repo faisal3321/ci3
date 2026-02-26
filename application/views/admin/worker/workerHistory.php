@@ -127,7 +127,7 @@
                 data: { worker_id: worker_id },
                 dataType: 'json',
                 success: function(response) {
-                    if(response.status) {
+                    if(response.status && response.data && response.data.length > 0) {
                         let data = response.data;
                         let html = '';
                         
@@ -155,7 +155,7 @@
                         
                         $('#worker-table-body').html(html);
                     } else {
-                        $('#worker-table-body').html('<tr><td colspan="6" style="text-align:center;">No data found</td></tr>');
+                        $('#worker-table-body').html('<tr><td colspan="6" style="text-align:center;">No records found</td></tr>');
                     }
                 },
                 error: function() {
