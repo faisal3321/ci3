@@ -297,53 +297,143 @@ class Api_model extends CI_Model {
 
 
 	// Adding Worker History Table
+	// public function addWorkerHistory($worker_id) {
+
+	// 	// Fetch worker info including name and created_at
+	// 	$this->db->select('name, created_at');
+	// 	$this->db->where('id', $worker_id);
+	// 	$worker = $this->db->get('workers')->row();
+
+	// 	if (!$worker) return false;
+
+	// 	$name = $worker->name;
+	// 	$worker_created_date = date('Y-m-d', strtotime($worker->created_at));
+
+	// 	// 2. Get date input
+	// 	$work_start_date = $this->input->post('work_start_date');
+	// 	$work_end_date = $this->input->post('work_end_date');
+
+	// 	// We cannot have worker history row, start date before worker was created
+	// 	if ($work_start_date < $worker_created_date) {
+	// 		return ['Error' => 'Worker History cannot be before worker creation date ' . $worker_created_date . ''];
+	// 	}
+
+	// 	// 4. Validation: No future dates
+	// 	$today = date('Y-m-d');
+	// 	if ($work_start_date > $today) return false;
+	// 	if (!empty($work_end_date) && $work_end_date > $today && $work_end_date != '0000-00-00 00:00:00') {
+	// 		return false;
+	// 	}
+
+	// 	$now = date('Y-m-d H:i:s');
+	// 	$default_date = "0000-00-00 00:00:00";
+
+	// 	$insertData = [
+	// 		'worker_id'         => $worker_id,
+	// 		'name'              => $name,
+	// 		'work_start_date'   => $work_start_date,
+	// 		'work_end_date'     => empty($work_end_date) ? $default_date : $work_end_date,
+	// 		'isDeleted'         => "0",
+	// 		'createdAt'         => $now,
+	// 		'updatedAt'         => $now
+	// 	];
+
+	// 	$this->db->insert('worker_history', $insertData);
+	// 	$insertData['id'] = $this->db->insert_id();
+
+	// 	$this->syncAttendanceWithWorkerHistory($worker_id);
+	// 	return $insertData;
+	// }
 	public function addWorkerHistory($worker_id) {
+    // Debug logging
+    log_message('error', '=== addWorkerHistory START ===');
+    log_message('error', 'Worker ID: ' . $worker_id);
+    
+    // Fetch worker info
+    $this->db->select('name, created_at');
+    $this->db->where('id', $worker_id);
+    $worker = $this->db->get('workers')->row();
 
-		// Fetch worker info including name and created_at
-		$this->db->select('name, created_at');
-		$this->db->where('id', $worker_id);
-		$worker = $this->db->get('workers')->row();
+    if (!$worker) {
+        log_message('error', 'Worker not found: ' . $worker_id);
+        return ['Error' => 'Worker not found'];
+    }
 
-		if (!$worker) return false;
+    $name = $worker->name;
+    $worker_created_date = date('Y-m-d', strtotime($worker->created_at));
+    log_message('error', 'Worker created date: ' . $worker_created_date);
 
-		$name = $worker->name;
-		$worker_created_date = date('Y-m-d', strtotime($worker->created_at));
+    // Get date input
+    $work_start_date = $this->input->post('work_start_date');
+    $work_end_date = $this->input->post('work_end_date');
+    
+    log_message('error', 'Raw POST - start: ' . $work_start_date . ' | end: ' . $work_end_date);
 
-		// 2. Get date input
-		$work_start_date = $this->input->post('work_start_date');
-		$work_end_date = $this->input->post('work_end_date');
+    // Validate date formats
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $work_start_date)) {
+        log_message('error', 'Invalid start date format: ' . $work_start_date);
+        return ['Error' => 'Invalid start date format. Use YYYY-MM-DD'];
+    }
+    
+    if (!empty($work_end_date) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $work_end_date)) {
+        log_message('error', 'Invalid end date format: ' . $work_end_date);
+        return ['Error' => 'Invalid end date format. Use YYYY-MM-DD'];
+    }
 
-		// We cannot have worker history row, start date before worker was created
-		if ($work_start_date < $worker_created_date) {
-			return ['Error' => 'Worker History cannot be before worker creation date ' . $worker_created_date . ''];
-		}
+    // Validation: Start date cannot be before worker creation
+    if ($work_start_date < $worker_created_date) {
+        log_message('error', 'Start date before worker creation: ' . $work_start_date . ' < ' . $worker_created_date);
+        return ['Error' => 'Worker History cannot be before worker creation date ' . $worker_created_date];
+    }
 
-		// 4. Validation: No future dates
-		$today = date('Y-m-d');
-		if ($work_start_date > $today) return false;
-		if (!empty($work_end_date) && $work_end_date > $today && $work_end_date != '0000-00-00 00:00:00') {
-			return false;
-		}
+    // Validation: No future dates
+    $today = date('Y-m-d');
+    if ($work_start_date > $today) {
+        log_message('error', 'Start date is in future: ' . $work_start_date);
+        return ['Error' => 'Start date cannot be in the future'];
+    }
+    
+    if (!empty($work_end_date) && $work_end_date > $today) {
+        log_message('error', 'End date is in future: ' . $work_end_date);
+        return ['Error' => 'End date cannot be in the future'];
+    }
 
-		$now = date('Y-m-d H:i:s');
-		$default_date = "0000-00-00 00:00:00";
+    // Check for date overlap
+    $hasOverlap = $this->checkDateOverlap($worker_id, $work_start_date, $work_end_date);
+    if ($hasOverlap) {
+        log_message('error', 'Date overlap detected');
+        return ['Error' => 'Date range overlaps with existing history'];
+    }
 
-		$insertData = [
-			'worker_id'         => $worker_id,
-			'name'              => $name,
-			'work_start_date'   => $work_start_date,
-			'work_end_date'     => empty($work_end_date) ? $default_date : $work_end_date,
-			'isDeleted'         => "0",
-			'createdAt'         => $now,
-			'updatedAt'         => $now
-		];
+    $now = date('Y-m-d H:i:s');
+    $default_date = "0000-00-00 00:00:00";
 
-		$this->db->insert('worker_history', $insertData);
-		$insertData['id'] = $this->db->insert_id();
+    $insertData = [
+        'worker_id'       => $worker_id,
+        'name'            => $name,
+        'work_start_date' => $work_start_date,
+        'work_end_date'   => empty($work_end_date) ? $default_date : $work_end_date,
+        'isDeleted'       => "0",
+        'createdAt'       => $now,
+        'updatedAt'       => $now
+    ];
+    
+    log_message('error', 'Insert data: ' . json_encode($insertData));
 
-		$this->syncAttendanceWithWorkerHistory($worker_id);
-		return $insertData;
-	}
+    if (!$this->db->insert('worker_history', $insertData)) {
+        log_message('error', 'DB Insert failed: ' . $this->db->error()['message']);
+        return ['Error' => 'Database error: ' . $this->db->error()['message']];
+    }
+    
+    $insert_id = $this->db->insert_id();
+    log_message('error', 'Insert ID: ' . $insert_id);
+    $insertData['id'] = $insert_id;
+
+    $this->syncAttendanceWithWorkerHistory($worker_id);
+    log_message('error', '=== addWorkerHistory END ===');
+    
+    return $insertData;
+}
 
 
 
