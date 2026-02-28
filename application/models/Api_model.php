@@ -297,8 +297,8 @@ class Api_model extends CI_Model {
 
 
 	// Adding Worker History Table
-	public function addWorkerHistory($worker_id) {
-
+	public function addWorkerHistory($worker_id) 
+	{
 		// Fetch worker info including name and created_at
 		$this->db->select('name, created_at');
 		$this->db->where('id', $worker_id);
