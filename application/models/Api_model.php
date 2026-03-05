@@ -270,8 +270,8 @@ class Api_model extends CI_Model {
 	// ========================    Worker History    ===========================
 
     
-	public function workerHistory($worker_id) {
-
+	public function workerHistory($worker_id) 
+	{
 		$this->db->select('
 		wh.id,
 		wh.worker_id,
@@ -351,7 +351,6 @@ class Api_model extends CI_Model {
 	// edit worker history
 	public function editWorkerHistory($id, $work_start_date, $work_end_date)
 	{
-
 		$data = [
 			'work_start_date'	=> $work_start_date,
 			'work_end_date'		=> $work_end_date,
@@ -366,7 +365,6 @@ class Api_model extends CI_Model {
 			$this->syncAttendanceWithWorkerHistory($worker_id);
 		}
 		return true;
-
 	}
 
 
