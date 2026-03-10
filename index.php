@@ -55,7 +55,7 @@ error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
  *
  * NOTE: If you change these, also change the error_reporting() code below
  */
-	define('ENVIRONMENT', 'development');
+	define('ENVIRONMENT', 'production');
 /*
  *---------------------------------------------------------------
  * ERROR REPORTING
@@ -67,8 +67,9 @@ error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
 switch (ENVIRONMENT)
 {
 	case 'development':
-		error_reporting(-1);
-		ini_set('display_errors', 1);
+	    // This tells PHP to show real errors but ignore the Deprecated noise (8192)
+	    error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
+	    ini_set('display_errors', 1);
 	break;
 
 	case 'testing':
