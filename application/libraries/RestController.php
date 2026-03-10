@@ -7,6 +7,7 @@ use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
 use stdClass;
 
+#[AllowDynamicProperties] // <--- Add this line here
 defined('BASEPATH') or exit('No direct script access allowed');
 
 /**
