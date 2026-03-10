@@ -92,6 +92,8 @@ $db['default'] = array(
 	'encrypt' => FALSE,
 	'compress' => FALSE,
 	'stricton' => FALSE,
+	// Add this line inside your $db['default'] array
+	'before' => "SET sql_mode=(SELECT REPLACE(@@sql_mode,'NO_ZERO_DATE',''))",
 	'failover' => array(),
 	'save_queries' => TRUE,
 	// Add the port for Railway specifically
