@@ -75,10 +75,11 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => 'localhost',
-	'username' => 'root',
-	'password' => '',
-	'database' => 'attendance',
+	// Railway provides these variables automatically once you link the MySQL service
+	'hostname' => getenv('MYSQLHOST') ?: 'localhost',
+	'username' => getenv('MYSQLUSER') ?: 'root',
+	'password' => getenv('MYSQLPASSWORD') ?: '',
+	'database' => getenv('MYSQLDATABASE') ?: 'attendance',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
@@ -92,5 +93,7 @@ $db['default'] = array(
 	'compress' => FALSE,
 	'stricton' => FALSE,
 	'failover' => array(),
-	'save_queries' => TRUE
+	'save_queries' => TRUE,
+	// Add the port for Railway specifically
+	'port'     => getenv('MYSQLPORT') ?: 3306,
 );
