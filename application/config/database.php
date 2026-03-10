@@ -95,5 +95,5 @@ $db['default'] = array(
 	'failover' => array(),
 	'save_queries' => TRUE,
 	// Add the port for Railway specifically
-	'port'     => getenv('MYSQLPORT') ?: 3306,
+	'port'     => getenv('MYSQLPORT') ?: 33342,
 );
