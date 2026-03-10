@@ -1,7 +1,7 @@
 {
     "description" : "The CodeIgniter Application with Composer",
     "require": {
-        "php": "^8.0.30",
+        "php": "8.2",
         "codeigniter/framework": "3.1.*",
         "chriskacerguis/codeigniter-restserver": "^3.1"
     },
