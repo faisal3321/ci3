@@ -9,6 +9,9 @@ class Api extends RestController {
 	
     function __construct(){
         parent::__construct();
+		if (!class_exists('Format')) {
+	        require_once APPPATH . 'libraries/Format.php';
+	    }
         $this->load->model('Api_model', 'api');
 		$this->load->library('RateLimiter', NULL, 'rl'); // in library alias is third parameter
 
