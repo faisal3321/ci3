@@ -4,7 +4,7 @@ use chriskacerguis\RestServer\RestController;
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-
+#[AllowDynamicProperties]
 class Api extends RestController {
 	
     function __construct(){
