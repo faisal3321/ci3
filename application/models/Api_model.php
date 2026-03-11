@@ -127,11 +127,18 @@ class Api_model extends CI_Model {
 		$today = date('Y-m-d');
 
 		// 3. Find all dates that SHOULD have attendance based on worker_history
+		// FIXED: Changed join logic to bypass MySQL Strict Mode 1525 error
 		$this->db->select('c.id, c.calendar_date');
 		$this->db->from('calendar c');
-		$this->db->join('worker_history wh', "c.calendar_date >= wh.work_start_date 
-			AND (wh.work_end_date = '0000-00-00 00:00:00' OR wh.work_end_date >= c.calendar_date)", 'inner');
-		$this->db->where('wh.worker_id', $workerId);
+		$this->db->join('worker_history wh', 'wh.worker_id = ' . $workerId, 'inner');
+		
+		$this->db->where('c.calendar_date >= wh.work_start_date');
+		$this->db->group_start();
+			// Check for 'zero' date or empty date safely
+			$this->db->where('wh.work_end_date <', '1970-01-02'); 
+			$this->db->or_where('wh.work_end_date >=', 'c.calendar_date', FALSE);
+		$this->db->group_end();
+
 		$this->db->where('wh.isDeleted', '0');
 		$this->db->where('c.calendar_date <=', $today);
 		$this->db->group_by('c.id'); 
@@ -139,8 +146,6 @@ class Api_model extends CI_Model {
 		$allDates = $this->db->get()->result();
 
 		foreach ($allDates as $date) {
-			// Check if record exists AT ALL (ignore isDeleted here)
-			// This prevents "Duplicate Entry" errors during sync
 			$existsAtAll = $this->db->get_where('attendance', [
 				'worker_id' => $workerId, 
 				'attendance_date' => $date->id
@@ -176,7 +181,7 @@ class Api_model extends CI_Model {
 		$this->db->join('workers w', 'w.id = a.worker_id', 'inner');
 
 		$this->db->where('a.worker_id', $workerId);
-		$this->db->where('a.isDeleted', '0'); // Show only active records
+		$this->db->where('a.isDeleted', '0'); 
 		$this->db->where('c.calendar_date <= ', $today);
 
 		if($startDate) {
@@ -190,7 +195,6 @@ class Api_model extends CI_Model {
 		
 		return $this->db->get()->result_array();
 	}
-
 
 
 	
