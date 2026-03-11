@@ -126,8 +126,7 @@ class Api_model extends CI_Model {
 
 		$today = date('Y-m-d');
 
-		// 3. Find all dates that SHOULD have attendance based on worker_history
-		// FIXED: Changed join logic to bypass MySQL Strict Mode 1525 error
+		// 3. Find all dates that should have attendance based on worker_history
 		$this->db->select('c.id, c.calendar_date');
 		$this->db->from('calendar c');
 		$this->db->join('worker_history wh', 'wh.worker_id = ' . $workerId, 'inner');
