@@ -5,8 +5,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class RateLimiter 
 {
     protected $CI;
-    protected $maxTokens = 30; // max token in bucket can be 30
-    protected $refillRate = 10; // 10 token per min refiller will refill the bucket
+    protected $maxTokens = 5; // max token in bucket can be 30
+    protected $refillRate = 2; // 10 token per min refiller will refill the bucket
 
 
     public function __construct() 
@@ -67,7 +67,7 @@ class RateLimiter
 
         if (!$res) return ;
 
-        if ($res->tokens < 5) {
+        if ($res->tokens < 2) {
 
             $delaySeconds = ($this->maxTokens - $res->tokens) * 0.2;
             $out = min(3, $delaySeconds); // max load for 3 seconds
